@@ -1,0 +1,40 @@
+# Dipendenze
+node_modules/
+
+# Build
+dist/
+.astro/
+.output/
+.vercel/
+.netlify/
+.wrangler/
+
+# Variabili d'ambiente — non devono MAI finire nel repository
+.env
+.env.*
+!.env.example
+
+# Materiale di lavorazione locale (ZIP, PDF, backup, vecchio sito React)
+_archivio/
+legacy/
+
+# Export ed elaborati temporanei
+*.local
+tmp/
+temp/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.claude/settings.local.json
+
+# Log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*

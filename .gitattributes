@@ -1,0 +1,15 @@
+# Normalizza i fine riga: il repository conserva LF, Windows lavora con CRLF.
+# Serve perché il build gira su Linux (Cloudflare Pages).
+* text=auto eol=lf
+
+# File binari: mai convertiti
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.webp  binary
+*.avif  binary
+*.ico   binary
+*.pdf   binary
+*.zip   binary
+*.woff  binary
+*.woff2 binary
