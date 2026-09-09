@@ -23,6 +23,22 @@ const DIST = resolve(QUI, '..', 'dist')
 
 const anteprima = process.env.CONTENUTI_LOCALI === '1'
 
+/**
+ * Guardia: l'anteprima non deve poter uscire in produzione.
+ *
+ * Cloudflare Pages e GitHub Actions impostano entrambi CI=true. Se lì dentro
+ * qualcuno impostasse anche CONTENUTI_LOCALI, il sito verrebbe pubblicato con
+ * i contenuti del vecchio sito e la fascia rossa addosso. Meglio fermarsi.
+ */
+if (anteprima && process.env.CI) {
+  console.error(
+    '\nBUILD INTERROTTO: modalità anteprima dentro un ambiente di produzione.\n' +
+      'CONTENUTI_LOCALI=1 serve solo sul computer di chi sviluppa.\n' +
+      'Toglila dalle variabili di Cloudflare Pages o di GitHub Actions.\n',
+  )
+  process.exit(1)
+}
+
 function tutteLePagine(cartella) {
   const trovate = []
   for (const voce of readdirSync(cartella)) {
