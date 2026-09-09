@@ -1,0 +1,27 @@
+{
+  "name": "manunta-studio",
+  "description": "Pannello di gestione dei contenuti del sito Alessandro Manunta Coltelli",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "esporta": "sanity dataset export"
+  },
+  "dependencies": {
+    "@sanity/locale-it-it": "^1.1.36",
+    "react": "^19.2.2",
+    "react-dom": "^19.2.2",
+    "sanity": "^6.13.0",
+    "styled-components": "^6.1.15"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^7.0.2"
+  }
+}
