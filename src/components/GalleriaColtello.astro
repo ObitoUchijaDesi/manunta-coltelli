@@ -1,0 +1,388 @@
+---
+import type {Coltello} from '../lib/tipi'
+import FotoColtello from './FotoColtello.astro'
+import {LARGHEZZE_DETTAGLIO, altImmagine, urlImmagine, srcsetImmagine} from '../lib/immagini'
+
+// A schermo intero servono misure più grandi che nella pagina.
+const LARGHEZZE_LIGHTBOX = [800, 1200, 1600, 2000]
+
+interface Props {
+  coltello: Coltello
+}
+
+const {coltello} = Astro.props
+
+const foto = [coltello.immaginePrincipale, ...coltello.galleria]
+const idDialog = `foto-${coltello.slug}`
+---
+
+<div class="galleria" data-galleria>
+  <button
+    type="button"
+    class="galleria-principale"
+    data-apri="0"
+    aria-label={`Ingrandisci la foto di ${coltello.nome}`}
+  >
+    <FotoColtello
+      immagine={coltello.immaginePrincipale}
+      nomeColtello={coltello.nome}
+      larghezze={LARGHEZZE_DETTAGLIO}
+      sizes="(max-width: 900px) 94vw, 55vw"
+      prioritaria={true}
+      class="galleria-immagine"
+    />
+    <span class="galleria-lente" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <line x1="11" y1="8" x2="11" y2="14"></line>
+        <line x1="8" y1="11" x2="14" y2="11"></line>
+      </svg>
+      Ingrandisci
+    </span>
+  </button>
+
+  {
+    coltello.galleria.length > 0 && (
+      <ul class="galleria-miniature">
+        {coltello.galleria.map((immagine, i) => (
+          <li>
+            <button
+              type="button"
+              class="galleria-miniatura"
+              data-apri={String(i + 1)}
+              aria-label={`Ingrandisci la foto ${i + 2} di ${coltello.nome}`}
+            >
+              <FotoColtello
+                immagine={immagine}
+                nomeColtello={coltello.nome}
+                larghezze={[200, 400, 600]}
+                sizes="120px"
+                indice={i + 2}
+              />
+            </button>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</div>
+
+{/*
+  Elemento <dialog> nativo: il browser si occupa da solo del focus trap, della
+  chiusura con Escape, di rendere inerte il resto della pagina e di restituire
+  il focus al pulsante che ha aperto la finestra. Rifare queste cose a mano
+  significa scrivere codice fragile per riottenere quello che c'è già.
+*/}
+<dialog class="lightbox" id={idDialog} aria-label={`Fotografie di ${coltello.nome}`}>
+  <div class="lightbox-barra">
+    <p class="lightbox-conteggio" aria-live="polite" data-conteggio>
+      {foto.length > 1 ? `1 di ${foto.length}` : ''}
+    </p>
+    <button type="button" class="lightbox-chiudi" data-chiudi aria-label="Chiudi le fotografie">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="20" height="20" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <div class="lightbox-palco" data-palco>
+    {
+      foto.length > 1 && (
+        <button type="button" class="lightbox-freccia lightbox-precedente" data-precedente aria-label="Foto precedente">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="24" height="24" aria-hidden="true">
+            <polyline points="15,18 9,12 15,6" />
+          </svg>
+        </button>
+      )
+    }
+
+    {
+      foto.map((immagine, i) => (
+        <img
+          class="lightbox-foto"
+          data-indice={String(i)}
+          data-src={urlImmagine(immagine, 1600)}
+          data-srcset={srcsetImmagine(immagine, LARGHEZZE_LIGHTBOX)}
+          sizes="100vw"
+          alt={altImmagine(immagine, coltello.nome, i + 1)}
+          hidden={i !== 0}
+          decoding="async"
+        />
+      ))
+    }
+
+    {
+      foto.length > 1 && (
+        <button type="button" class="lightbox-freccia lightbox-successiva" data-successiva aria-label="Foto successiva">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="24" height="24" aria-hidden="true">
+            <polyline points="9,18 15,12 9,6" />
+          </svg>
+        </button>
+      )
+    }
+  </div>
+</dialog>
+
+<script>
+  /**
+   * Lightbox costruita attorno all'elemento <dialog>.
+   *
+   * Il browser fa già da solo: focus trap, chiusura con Escape, sfondo inerte,
+   * focus restituito al pulsante che ha aperto. Qui resta solo il minimo:
+   * scegliere quale foto mostrare, caricarla la prima volta che serve, e
+   * gestire frecce e scorrimento con il dito.
+   */
+  const galleria = document.querySelector<HTMLElement>('[data-galleria]')
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.lightbox')
+
+  if (galleria && dialog) {
+    const foto = Array.from(dialog.querySelectorAll<HTMLImageElement>('.lightbox-foto'))
+    const conteggio = dialog.querySelector<HTMLElement>('[data-conteggio]')
+    const palco = dialog.querySelector<HTMLElement>('[data-palco]')
+    let attiva = 0
+
+    const mostra = (indice: number) => {
+      // Giro circolare: dall'ultima si torna alla prima. Evita di dover
+      // disabilitare i pulsanti, che farebbe perdere il focus da tastiera.
+      attiva = (indice + foto.length) % foto.length
+
+      foto.forEach((immagine, i) => {
+        const visibile = i === attiva
+        immagine.hidden = !visibile
+
+        // La sorgente si assegna solo quando la foto serve davvero: aprire la
+        // pagina non scarica tutte le fotografie a grandezza piena.
+        if (visibile && !immagine.src) {
+          const src = immagine.dataset.src
+          const srcset = immagine.dataset.srcset
+          if (srcset) immagine.srcset = srcset
+          if (src) immagine.src = src
+        }
+      })
+
+      if (conteggio && foto.length > 1) {
+        conteggio.textContent = `${attiva + 1} di ${foto.length}`
+      }
+    }
+
+    const apri = (indice: number) => {
+      mostra(indice)
+      dialog.showModal()
+    }
+
+    galleria.querySelectorAll<HTMLButtonElement>('[data-apri]').forEach((pulsante) => {
+      pulsante.addEventListener('click', () => apri(Number(pulsante.dataset.apri ?? 0)))
+    })
+
+    dialog.querySelector('[data-chiudi]')?.addEventListener('click', () => dialog.close())
+    dialog.querySelector('[data-precedente]')?.addEventListener('click', () => mostra(attiva - 1))
+    dialog.querySelector('[data-successiva]')?.addEventListener('click', () => mostra(attiva + 1))
+
+    dialog.addEventListener('keydown', (evento) => {
+      if (foto.length < 2) return
+      if (evento.key === 'ArrowLeft') {
+        evento.preventDefault()
+        mostra(attiva - 1)
+      }
+      if (evento.key === 'ArrowRight') {
+        evento.preventDefault()
+        mostra(attiva + 1)
+      }
+    })
+
+    // Scorrimento con il dito. Nessuna libreria: due coordinate e una soglia.
+    let partenzaX = 0
+    palco?.addEventListener(
+      'touchstart',
+      (evento) => {
+        partenzaX = evento.changedTouches[0].clientX
+      },
+      {passive: true},
+    )
+
+    palco?.addEventListener(
+      'touchend',
+      (evento) => {
+        if (foto.length < 2) return
+        const spostamento = evento.changedTouches[0].clientX - partenzaX
+        if (Math.abs(spostamento) < 50) return
+        mostra(spostamento < 0 ? attiva + 1 : attiva - 1)
+      },
+      {passive: true},
+    )
+
+    // Un tocco sullo sfondo attorno alla foto chiude, come ci si aspetta.
+    dialog.addEventListener('click', (evento) => {
+      if (evento.target === dialog || evento.target === palco) dialog.close()
+    })
+  }
+</script>
+
+<style>
+  /* La pagina dietro non deve scorrere mentre la lightbox è aperta. */
+  :global(body:has(dialog.lightbox[open])) {
+    overflow: hidden;
+  }
+
+  .galleria-principale {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: zoom-in;
+    position: relative;
+  }
+
+  .galleria-immagine {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .galleria-lente {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(10, 10, 10, 0.78);
+    color: var(--text);
+    padding: 0.5rem 0.8rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .galleria-miniature {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+  }
+
+  .galleria-miniatura {
+    width: 96px;
+    height: 96px;
+    padding: 0;
+    border: 1px solid var(--border2);
+    background: none;
+    cursor: zoom-in;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .galleria-miniatura:hover {
+    border-color: var(--gold);
+  }
+
+  .galleria-miniatura :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ── Lightbox ── */
+  .lightbox {
+    padding: 0;
+    border: none;
+    background: var(--bg);
+    color: var(--text);
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .lightbox::backdrop {
+    background: rgba(0, 0, 0, 0.92);
+  }
+
+  .lightbox-barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    min-height: 60px;
+  }
+
+  .lightbox-conteggio {
+    margin: 0;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  .lightbox-chiudi,
+  .lightbox-freccia {
+    min-width: 48px;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.25s, color 0.25s;
+  }
+
+  .lightbox-chiudi:hover,
+  .lightbox-freccia:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .lightbox-palco {
+    position: relative;
+    height: calc(100dvh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+
+  .lightbox-foto {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .lightbox-foto[hidden] {
+    display: none;
+  }
+
+  .lightbox-freccia {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(10, 10, 10, 0.7);
+    z-index: 2;
+  }
+
+  .lightbox-precedente {
+    left: 0.75rem;
+  }
+  .lightbox-successiva {
+    right: 0.75rem;
+  }
+
+  @media (max-width: 560px) {
+    .galleria-miniatura {
+      width: 76px;
+      height: 76px;
+    }
+  }
+</style>

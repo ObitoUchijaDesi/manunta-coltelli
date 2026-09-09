@@ -1,8 +1,8 @@
 ---
 import Base from '../../layouts/Base.astro'
-import FotoColtello from '../../components/FotoColtello.astro'
+import GalleriaColtello from '../../components/GalleriaColtello.astro'
 import {caricaColtelli, caricaImpostazioni} from '../../lib/contenuti'
-import {LARGHEZZE_DETTAGLIO, urlSocial} from '../../lib/immagini'
+import {urlSocial} from '../../lib/immagini'
 import {urlWhatsApp, urlEmail} from '../../lib/contatti'
 import {ETICHETTE_DISPONIBILITA, ETICHETTE_CATEGORIA} from '../../lib/tipi'
 import type {Coltello, ImpostazioniSito} from '../../lib/tipi'
@@ -117,33 +117,7 @@ const successivo = posizione < coltelli.length - 1 ? coltelli[posizione + 1] : n
       </nav>
 
       <div class="detail-grid">
-        <div class="gallery">
-          <FotoColtello
-            immagine={coltello.immaginePrincipale}
-            nomeColtello={coltello.nome}
-            larghezze={LARGHEZZE_DETTAGLIO}
-            sizes="(max-width: 900px) 94vw, 55vw"
-            prioritaria={true}
-            class="gallery-main"
-          />
-
-          {
-            coltello.galleria.length > 0 && (
-              <div class="gallery-altre">
-                {coltello.galleria.map((foto, i) => (
-                  <FotoColtello
-                    immagine={foto}
-                    nomeColtello={coltello.nome}
-                    larghezze={LARGHEZZE_DETTAGLIO}
-                    sizes="(max-width: 900px) 94vw, 55vw"
-                    indice={i + 2}
-                    class="gallery-secondaria"
-                  />
-                ))}
-              </div>
-            )
-          }
-        </div>
+        <GalleriaColtello coltello={coltello} />
 
         <div class="detail-info">
           <div class="detail-etichette">
@@ -270,19 +244,6 @@ const successivo = posizione < coltelli.length - 1 ? coltelli[posizione + 1] : n
     color: var(--muted);
     border: 1px solid var(--border2);
     padding: 0.3rem 0.7rem;
-  }
-
-  .gallery-altre {
-    display: grid;
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-
-  .gallery-main,
-  .gallery-secondaria {
-    width: 100%;
-    height: auto;
-    display: block;
   }
 
   .scheda-tecnica {
