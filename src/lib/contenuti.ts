@@ -114,7 +114,9 @@ export async function caricaColtelli(): Promise<Coltello[]> {
   const risultato = await clientSanity.fetch<any[]>(QUERY_COLTELLI)
 
   return risultato
-    .filter((c) => c.slug && c.immaginePrincipale)
+    // Serve l'immagine vera, non il campo immagine: un riquadro foto aggiunto
+    // e lasciato vuoto è un oggetto che esiste ma non ha dentro niente.
+    .filter((c) => c.slug && c.immaginePrincipale?.asset?._ref)
     .map(
       (c): Coltello => ({
         slug: c.slug,
@@ -136,11 +138,16 @@ export async function caricaColtelli(): Promise<Coltello[]> {
           riferimento: c.immaginePrincipale,
           alt: c.immaginePrincipale?.alt ?? '',
         },
-        galleria: (c.galleria ?? []).map((g: any) => ({
-          origine: 'sanity' as const,
-          riferimento: g,
-          alt: g?.alt ?? '',
-        })),
+        // Stessa cosa per la galleria: i riquadri vuoti si scartano invece di
+        // far fallire il build. Un riquadro lasciato a metà mentre si compila
+        // dal telefono non deve impedire di pubblicare.
+        galleria: (c.galleria ?? [])
+          .filter((g: any) => g?.asset?._ref)
+          .map((g: any) => ({
+            origine: 'sanity' as const,
+            riferimento: g,
+            alt: g?.alt ?? '',
+          })),
       }),
     )
 }
