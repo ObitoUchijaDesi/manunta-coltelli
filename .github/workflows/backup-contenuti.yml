@@ -1,0 +1,157 @@
+name: Backup dei contenuti
+
+# Copia dei contenuti FUORI da Sanity. Un backup che vive nello stesso servizio
+# del dato originale non è un backup.
+#
+# Due copie, con scopi diversi:
+#   1. Archivio completo (testi + fotografie vere) come artefatto della
+#      lavorazione. Conservato 90 giorni, che è il massimo del piano gratuito
+#      di GitHub.
+#   2. Solo i testi, scritti sul branch "backup". Occupano pochi kilobyte e
+#      restano per sempre, con lo storico di ogni modifica.
+#
+# Quello che NON copre: le fotografie più vecchie di 90 giorni. Restano su
+# Sanity e sul telefono di chi le ha scattate. Per tenerle davvero per sempre
+# va scaricato l'archivio completo ogni tanto e messo da parte — è scritto nel
+# manuale del proprietario.
+
+on:
+  # A mano, quando serve: scheda Actions -> questo workflow -> "Run workflow".
+  workflow_dispatch:
+
+  # Ogni lunedì alle 3:15 UTC. Non a mezzanotte in punto: a quell'ora la coda
+  # di GitHub è intasata e i lavori partono in ritardo.
+  schedule:
+    - cron: '15 3 * * 1'
+
+# Serve solo per scrivere sul branch backup. Niente di più.
+permissions:
+  contents: write
+
+concurrency:
+  group: backup-contenuti
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Esporta il dataset Sanity
+    runs-on: ubuntu-latest
+
+    env:
+      # Token di sola lettura, dai secret del repository. Non viene mai
+      # stampato: viene letto direttamente dalla CLI di Sanity.
+      SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+      PROGETTO: ${{ vars.SANITY_PROJECT_ID }}
+      DATASET: ${{ vars.SANITY_DATASET }}
+
+    steps:
+      - name: Controlla che la configurazione ci sia
+        run: |
+          mancanti=""
+          [ -z "$SANITY_AUTH_TOKEN" ] && mancanti="$mancanti SANITY_AUTH_TOKEN(secret)"
+          [ -z "$PROGETTO" ] && mancanti="$mancanti SANITY_PROJECT_ID(variable)"
+          [ -z "$DATASET" ] && mancanti="$mancanti SANITY_DATASET(variable)"
+          if [ -n "$mancanti" ]; then
+            echo "Manca:$mancanti"
+            echo "Impostali in Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          echo "Configurazione presente."
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Archivio completo (testi + fotografie)
+        run: |
+          mkdir -p esportazione
+          # Senza --no-strict-asset-verification: se una fotografia non si
+          # scarica o non corrisponde, il backup FALLISCE invece di produrre
+          # un archivio incompleto che sembra buono.
+          npx --yes sanity@6 dataset export "$DATASET" \
+            esportazione/contenuti-completi.tar.gz \
+            --project-id "$PROGETTO" \
+            --overwrite
+
+      - name: Verifica che l'archivio non sia vuoto
+        run: |
+          dimensione=$(stat -c%s esportazione/contenuti-completi.tar.gz)
+          echo "Archivio: $dimensione byte"
+          if [ "$dimensione" -lt 1024 ]; then
+            echo "Archivio troppo piccolo: qualcosa è andato storto."
+            exit 1
+          fi
+          tar -tzf esportazione/contenuti-completi.tar.gz | head -20
+          echo "Documenti nell'archivio:"
+          tar -xzOf esportazione/contenuti-completi.tar.gz --wildcards '*data.ndjson' | wc -l
+
+      - name: Conserva l'archivio completo
+        uses: actions/upload-artifact@v4
+        with:
+          name: contenuti-completi-${{ github.run_id }}
+          path: esportazione/contenuti-completi.tar.gz
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Solo i testi, per il branch backup
+        run: |
+          npx --yes sanity@6 dataset export "$DATASET" \
+            esportazione/solo-testi.tar.gz \
+            --project-id "$PROGETTO" \
+            --no-assets \
+            --overwrite
+          mkdir -p estratto
+          tar -xzf esportazione/solo-testi.tar.gz -C estratto
+          find estratto -name '*.ndjson' -exec cp {} contenuti.ndjson \;
+          echo "Righe esportate: $(wc -l < contenuti.ndjson)"
+
+      - name: Scrivi sul branch backup solo se qualcosa è cambiato
+        run: |
+          git config user.name "Backup automatico"
+          git config user.email "actions@github.com"
+
+          # Il branch backup non condivide storia con main: è un archivio,
+          # non un ramo di sviluppo. Così non sporca la cronologia del codice.
+          if git ls-remote --exit-code --heads origin backup >/dev/null 2>&1; then
+            git fetch origin backup
+            git checkout backup
+          else
+            git checkout --orphan backup
+            git rm -rf --cached . >/dev/null 2>&1 || true
+            rm -rf src studio scripts public .github docs 2>/dev/null || true
+          fi
+
+          mkdir -p contenuti
+          mv contenuti.ndjson contenuti/contenuti.ndjson
+
+          cat > README.md <<'FINE'
+          # Backup dei contenuti
+
+          Copia automatica dei testi del sito, scritta ogni lunedì.
+
+          - `contenuti/contenuti.ndjson` — tutti i documenti Sanity (coltelli e
+            informazioni del sito). Un documento per riga.
+          - Le **fotografie non sono qui**: stanno negli artefatti del workflow
+            "Backup dei contenuti", conservati 90 giorni.
+
+          ## Come si ripristina
+
+          1. Scarica questo file.
+          2. `cd studio && npx sanity dataset import ../contenuti.ndjson <dataset>`
+
+          Per ripristinare anche le fotografie serve l'archivio completo dagli
+          artefatti, non questo file.
+          FINE
+
+          git add contenuti/contenuti.ndjson README.md
+
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica ai contenuti: niente da salvare."
+            exit 0
+          fi
+
+          git commit -m "backup: contenuti del $(date -u +%Y-%m-%d)"
+          git push origin backup
+          echo "Backup dei testi aggiornato."
