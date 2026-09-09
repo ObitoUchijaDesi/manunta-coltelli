@@ -226,6 +226,12 @@ const successivo = posizione < coltelli.length - 1 ? coltelli[posizione + 1] : n
   .briciole a {
     color: var(--muted);
     text-decoration: none;
+    /* Area toccabile da 24px anche se il testo è più basso: sono link in
+       linea, quindi l'eccezione WCAG 2.5.8 li coprirebbe comunque, ma su un
+       telefono restano scomodi da centrare col dito. */
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
   }
   .briciole a:hover {
     color: var(--gold);

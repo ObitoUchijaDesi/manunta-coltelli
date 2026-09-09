@@ -65,6 +65,14 @@ const anno = new Date().getFullYear()
 </footer>
 
 <style>
+  /* Area toccabile da 24px sul link della privacy: è un link in linea, ma
+     resta l'unico modo di raggiungere l'informativa da telefono. */
+  .footer-legal a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+  }
+
   /* Bersagli comodi da dito sulle icone social. */
   .footer-icon {
     min-width: 44px;
