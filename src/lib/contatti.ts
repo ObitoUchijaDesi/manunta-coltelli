@@ -69,9 +69,15 @@ export const messaggi = {
   /** Testo di WhatsApp dalle pagine che non parlano di un coltello preciso. */
   generico: 'Buongiorno Alessandro, vorrei avere alcune informazioni sui tuoi coltelli.',
 
-  /** Testo di WhatsApp dalla pagina di un coltello. */
+  /**
+   * Testo di WhatsApp dalla pagina o dalla scheda di un coltello.
+   *
+   * "al coltello X" e non "al X": i nomi cambiano genere — la Resolza è
+   * femminile, il Cinghiale maschile — e anteporre "coltello" fa tornare la
+   * frase con qualsiasi nome Alessandro inventi in futuro.
+   */
   perColtello: (nomeColtello: string) =>
-    `Buongiorno Alessandro, vorrei informazioni sul coltello ${nomeColtello}.`,
+    `Ciao Alessandro, sono interessato al coltello ${nomeColtello}. Potresti darmi più informazioni?`,
 
   oggettoEmail: (nomeColtello?: string) =>
     nomeColtello
