@@ -254,7 +254,11 @@ const idDialog = `foto-${coltello.slug}`
     position: relative;
   }
 
-  .galleria-immagine {
+  /* :global perché l'<img> lo produce FotoColtello, quindi porta l'ambito di
+     quel componente e non di questo: una regola normale non lo raggiunge.
+     height:auto è indispensabile — senza, l'attributo height dell'immagine
+     (2048px) diventa un'altezza CSS e la foto viene stirata. */
+  :global(.galleria-immagine) {
     width: 100%;
     height: auto;
     display: block;

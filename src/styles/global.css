@@ -499,6 +499,12 @@ ul { list-style: none; }
 
 .knife-card-img {
   width: 100%;
+  /* Senza height:auto il rapporto qui sotto viene ignorato. Gli attributi
+     width/height dell'<img> il browser li mappa a CSS width/height: con
+     un'altezza fissa di 2048px impostata dall'attributo, aspect-ratio non ha
+     effetto e la scheda diventa alta quanto la fotografia originale.
+     Non si vedeva finché le immagini erano locali e senza dimensioni note. */
+  height: auto;
   aspect-ratio: 4/3;
   object-fit: cover;
   display: block;
