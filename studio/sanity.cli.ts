@@ -15,5 +15,5 @@ export default defineCliConfig({
    * finché non serve. Il sito pubblico invece NON si aggiorna da solo: quello
    * passa sempre da un commit e da un build.
    */
-  autoUpdates: true,
+  deployment: {autoUpdates: true},
 })
