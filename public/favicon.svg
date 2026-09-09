@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="A. Manunta Coltelli">
+  <rect width="32" height="32" fill="#0a0a0a"/>
+  <!-- Due lame incrociate, come nel logo -->
+  <g stroke="#c9a84c" stroke-width="2.1" stroke-linecap="round" fill="none">
+    <path d="M8 24 L21 9"/>
+    <path d="M24 24 L11 9"/>
+  </g>
+  <g fill="#c9a84c">
+    <circle cx="21.6" cy="8.4" r="1.5"/>
+    <circle cx="10.4" cy="8.4" r="1.5"/>
+  </g>
+</svg>
