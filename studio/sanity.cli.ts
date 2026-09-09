@@ -15,5 +15,12 @@ export default defineCliConfig({
    * finché non serve. Il sito pubblico invece NON si aggiorna da solo: quello
    * passa sempre da un commit e da un build.
    */
-  deployment: {autoUpdates: true},
+  deployment: {
+    autoUpdates: true,
+
+    // Identificativo dell'applicazione creata al primo deploy. Non è un
+    // segreto: serve solo a far sapere alla CLI quale studio aggiornare,
+    // così i deploy successivi non chiedono conferma.
+    appId: 'idmo8g272gnp0vd909m6aclh',
+  },
 })

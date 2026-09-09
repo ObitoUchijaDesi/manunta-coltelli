@@ -9,7 +9,7 @@ Se qualcosa non torna, salta alla sezione **Se sbaglio**: non si rompe niente di
 ## 1. Come entrare
 
 1. Apri il browser del telefono (Chrome o Safari).
-2. Vai all'indirizzo del pannello: `DA COMPLETARE — indirizzo del pannello`
+2. Vai a questo indirizzo: **manunta-coltelli.sanity.studio**
 3. Tocca **Continua con Google** e scegli il tuo indirizzo email.
 4. Ci sei.
 
