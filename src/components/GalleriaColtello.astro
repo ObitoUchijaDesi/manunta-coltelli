@@ -74,7 +74,13 @@ const idDialog = `foto-${coltello.slug}`
   il focus al pulsante che ha aperto la finestra. Rifare queste cose a mano
   significa scrivere codice fragile per riottenere quello che c'è già.
 */}
-<dialog class="lightbox" id={idDialog} aria-label={`Fotografie di ${coltello.nome}`}>
+<dialog
+  class="lightbox"
+  id={idDialog}
+  role="dialog"
+  aria-modal="true"
+  aria-label={`Fotografie di ${coltello.nome}`}
+>
   <div class="lightbox-barra">
     <p class="lightbox-conteggio" aria-live="polite" data-conteggio>
       {foto.length > 1 ? `1 di ${foto.length}` : ''}
