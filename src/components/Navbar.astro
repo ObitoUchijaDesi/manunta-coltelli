@@ -1,0 +1,76 @@
+---
+const percorso = Astro.url.pathname
+
+const voci = [
+  {testo: 'Home', href: '/'},
+  {testo: 'Coltelli', href: '/coltelli/'},
+  {testo: 'Contatti', href: '/contatti/'},
+]
+
+const attiva = (href: string) =>
+  href === '/' ? percorso === '/' : percorso.startsWith(href)
+---
+
+<nav class="navbar" aria-label="Navigazione principale">
+  <a href="/" class="nav-logo">
+    {/* Il logo è avorio su fondo trasparente, generato da scripts/prepara-logo.mjs.
+        Niente filtri CSS: si sostituisce il file e basta. */}
+    <img src="/logo.png" alt="Alessandro Manunta — Coltelli artigianali" width="590" height="660" />
+  </a>
+
+  <ul class="nav-links">
+    {
+      voci.map((voce) => (
+        <li>
+          <a href={voce.href} aria-current={attiva(voce.href) ? 'page' : undefined}>
+            {voce.testo}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="nav-right">
+    <button
+      class="hamburger"
+      type="button"
+      aria-label="Apri il menu"
+      aria-expanded="false"
+      aria-controls="menu-mobile"
+    >
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="menu-mobile">
+  {
+    voci.map((voce) => (
+      <a href={voce.href} aria-current={attiva(voce.href) ? 'page' : undefined}>
+        {voce.testo}
+      </a>
+    ))
+  }
+</div>
+
+<style>
+  /* Il logo ora è già del colore giusto: restano solo le dimensioni. */
+  .nav-logo img {
+    height: 40px;
+    width: auto;
+    display: block;
+  }
+
+  /* Bersaglio comodo da dito: WCAG 2.2 chiede almeno 24px, 44 è l'uso reale. */
+  .hamburger {
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-links a[aria-current='page'],
+  .mobile-nav a[aria-current='page'] {
+    color: var(--gold);
+  }
+</style>

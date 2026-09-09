@@ -1,0 +1,185 @@
+---
+import Base from '../layouts/Base.astro'
+import SchedaColtello from '../components/SchedaColtello.astro'
+import {caricaColtelli, caricaImpostazioni} from '../lib/contenuti'
+import {urlWhatsApp} from '../lib/contatti'
+
+const impostazioni = await caricaImpostazioni()
+const coltelli = await caricaColtelli()
+
+// In home i primi sei: il catalogo completo ha la sua pagina.
+const inEvidenza = coltelli.slice(0, 6)
+
+const whatsapp = urlWhatsApp(
+  impostazioni,
+  'Ciao Alessandro! Ho visto il tuo sito e vorrei parlare di un progetto.',
+)
+
+const descrizione =
+  impostazioni.presentazioneBreve?.slice(0, 155) ||
+  'Coltelli artigianali sardi forgiati a mano, uno a uno.'
+
+const datiStrutturati: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: `${impostazioni.nomeArtigiano} Coltelli`,
+  description: descrizione,
+  url: Astro.site?.href,
+  image: new URL('/logo.png', Astro.site).href,
+  knowsAbout: ['coltelli artigianali', 'coltelleria sarda', 'resolza', 'forgiatura'],
+}
+
+// Solo campi verificabili: niente prezzi inventati, niente indirizzo finto.
+if (impostazioni.localita) {
+  datiStrutturati.address = {
+    '@type': 'PostalAddress',
+    addressLocality: impostazioni.localita,
+    addressCountry: 'IT',
+  }
+}
+if (impostazioni.instagram) {
+  datiStrutturati.sameAs = [`https://instagram.com/${impostazioni.instagram.replace(/^@/, '')}`]
+}
+---
+
+<Base
+  titolo="Alessandro Manunta Coltelli"
+  descrizione={descrizione}
+  impostazioni={impostazioni}
+  datiStrutturati={datiStrutturati}
+>
+  <main id="contenuto-principale">
+    <!-- ── APERTURA ── -->
+    <section class="hero" aria-label="Presentazione">
+      <div class="hero-inner">
+        <p class="hero-eyebrow">Artigianato coltelliero sardo</p>
+        <h1 class="hero-h1">Lame <em>forgiate</em><br />con anima</h1>
+        {impostazioni.presentazioneBreve && <p class="hero-sub">{impostazioni.presentazioneBreve}</p>}
+        <div class="hero-btns">
+          <a href="/coltelli/" class="btn-gold">Guarda il catalogo</a>
+          <a href="/contatti/" class="btn-ghost">Parliamo del progetto</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CHI SONO ── -->
+    {
+      impostazioni.biografia && (
+        <section class="section section-dark" id="chi-sono" aria-labelledby="titolo-chi-sono">
+          <div class="container">
+            <div class="divider"><span aria-hidden="true">✦</span></div>
+            <p class="s-label">Chi sono</p>
+            <h2 class="s-title" id="titolo-chi-sono">Passione e<br />tradizione</h2>
+            <p class="bio-text">{impostazioni.biografia}</p>
+          </div>
+        </section>
+      )
+    }
+
+    <!-- ── CATALOGO IN EVIDENZA ── -->
+    <section class="section" id="coltelli" aria-labelledby="titolo-coltelli">
+      <div class="container">
+        <div class="divider"><span aria-hidden="true">✦</span></div>
+        <p class="s-label">Collezione</p>
+        <h2 class="s-title" id="titolo-coltelli">Catalogo coltelli</h2>
+
+        {
+          inEvidenza.length === 0 ? (
+            <p class="nessun-coltello">Il catalogo è in preparazione.</p>
+          ) : (
+            <>
+              <div class="knives-grid">
+                {inEvidenza.map((coltello, i) => (
+                  <SchedaColtello
+                    coltello={coltello}
+                    impostazioni={impostazioni}
+                    prioritaria={i < 2}
+                  />
+                ))}
+              </div>
+
+              {coltelli.length > inEvidenza.length && (
+                <p class="vedi-tutti">
+                  <a href="/coltelli/" class="btn-ghost">
+                    Vedi tutti i {coltelli.length} coltelli
+                  </a>
+                </p>
+              )}
+            </>
+          )
+        }
+      </div>
+    </section>
+
+    <!-- ── COME LAVORO ── -->
+    {
+      impostazioni.passaggiLavorazione.length > 0 && (
+        <section class="section section-dark" aria-labelledby="titolo-processo">
+          <div class="container">
+            <div class="divider"><span aria-hidden="true">✦</span></div>
+            <p class="s-label">Il processo</p>
+            <h2 class="s-title" id="titolo-processo">Come lavoro</h2>
+            <ol class="process-grid">
+              {impostazioni.passaggiLavorazione.map((passaggio, i) => (
+                <li class="process-step">
+                  <span class="process-num" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <h3 class="process-title">{passaggio.titolo}</h3>
+                  <p class="process-body">{passaggio.testo}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      )
+    }
+
+    <!-- ── INVITO AL CONTATTO ── -->
+    <section class="section cta-section" aria-labelledby="titolo-contatto">
+      <div class="container cta-inner">
+        <div class="divider"><span aria-hidden="true">✦</span></div>
+        <h2 class="s-title" id="titolo-contatto" style="margin-bottom:.75rem">
+          Hai un progetto<br /><em class="cta-em">in mente?</em>
+        </h2>
+        {impostazioni.invitoContatto && <p class="cta-testo">{impostazioni.invitoContatto}</p>}
+        <div class="hero-btns">
+          {
+            whatsapp && (
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer" class="btn-gold">
+                Scrivimi su WhatsApp
+              </a>
+            )
+          }
+          <a href="/contatti/" class="btn-ghost">Vedi tutti i contatti</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .nessun-coltello {
+    color: var(--muted);
+    font-size: 0.95rem;
+    padding-top: 1rem;
+  }
+
+  .vedi-tutti {
+    margin-top: 3rem;
+    text-align: center;
+  }
+
+  .cta-em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .cta-testo {
+    color: var(--muted);
+    max-width: 480px;
+    margin: 0 auto 2.25rem;
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+</style>

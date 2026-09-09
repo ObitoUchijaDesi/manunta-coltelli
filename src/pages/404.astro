@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro'
+import {caricaImpostazioni} from '../lib/contenuti'
+
+const impostazioni = await caricaImpostazioni()
+---
+
+<Base
+  titolo="Pagina non trovata"
+  descrizione="La pagina che cerchi non esiste o è stata spostata."
+  impostazioni={impostazioni}
+  noindex={true}
+>
+  <main id="contenuto-principale" class="pagina-404">
+    <p class="numero-404" aria-hidden="true">404</p>
+    <h1>Pagina non trovata</h1>
+    <p class="testo-404">
+      L'indirizzo che hai aperto non esiste, oppure il coltello che cercavi non è più in catalogo.
+    </p>
+    <div class="hero-btns">
+      <a href="/coltelli/" class="btn-gold">Vedi il catalogo</a>
+      <a href="/" class="btn-ghost">Torna alla home</a>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .pagina-404 {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8rem 1.5rem 4rem;
+  }
+  .numero-404 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 5rem;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+  .pagina-404 h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+  .testo-404 {
+    color: var(--muted);
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+    max-width: 42ch;
+  }
+</style>

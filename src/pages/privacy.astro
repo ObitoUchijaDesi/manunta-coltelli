@@ -1,0 +1,98 @@
+---
+import Base from '../layouts/Base.astro'
+import {caricaImpostazioni} from '../lib/contenuti'
+
+const impostazioni = await caricaImpostazioni()
+
+/**
+ * BOZZA TECNICA, non un testo legale definitivo.
+ *
+ * Descrive esattamente quello che il sito fa oggi. Va aggiornata a ogni
+ * cambiamento (font ospitati in proprio, statistiche, modulo di contatto) e
+ * fatta leggere a un professionista prima della pubblicazione, insieme ai dati
+ * del titolare del trattamento che oggi mancano.
+ */
+---
+
+<Base
+  titolo="Privacy e cookie"
+  descrizione="Come questo sito tratta i dati di chi lo visita."
+  impostazioni={impostazioni}
+>
+  <main id="contenuto-principale">
+    <section class="legal-wrap" aria-labelledby="titolo-privacy">
+      <div class="divider"><span aria-hidden="true">✦</span></div>
+      <p class="s-label">Informativa</p>
+      <h1 class="s-title" id="titolo-privacy">Privacy e cookie</h1>
+
+      <div class="legal-content">
+        <h2>In breve</h2>
+        <p>
+          Questo sito è un catalogo. Non ha moduli che salvano dati, non usa cookie di
+          profilazione, non traccia chi lo visita e non ha un'area riservata per il pubblico. Per
+          questo non compare nessuna richiesta di consenso.
+        </p>
+
+        <h2>Cosa succede quando apri una pagina</h2>
+        <p>
+          Le pagine sono file già pronti serviti da Cloudflare. Come ogni server web, Cloudflare
+          registra temporaneamente dati tecnici di connessione, tra cui l'indirizzo IP, per
+          consegnare le pagine e proteggersi dagli abusi.
+        </p>
+
+        <h2>Cookie</h2>
+        <p>
+          Il sito non installa cookie propri e non usa strumenti di misurazione che richiedano il
+          tuo consenso.
+        </p>
+
+        <h2>Se ci scrivi</h2>
+        <p>
+          I pulsanti di contatto aprono WhatsApp, il programma di posta o Instagram: da quel
+          momento la conversazione avviene su quei servizi, secondo le loro informative. Quello che
+          scrivi arriva direttamente a {impostazioni.nomeArtigiano} e non passa da questo sito.
+        </p>
+
+        <h2>Servizi esterni</h2>
+        <p>
+          Le fotografie sono servite dalla rete di distribuzione di Sanity, che ospita anche i
+          contenuti del catalogo. I collegamenti ai contatti portano a WhatsApp e Instagram.
+        </p>
+
+        <h2>I tuoi diritti</h2>
+        <p>
+          Puoi chiedere in qualsiasi momento quali dati riguardanti la tua richiesta sono
+          conservati, correggerli o farli cancellare, scrivendo ai recapiti indicati nella pagina
+          contatti.
+        </p>
+
+        <div class="avviso-bozza">
+          <p>
+            <strong>Nota per chi sta preparando il sito.</strong> Questo testo descrive il
+            funzionamento tecnico ma non è ancora completo: mancano il titolare del trattamento
+            (nome o ragione sociale, sede, eventuale partita IVA) e la revisione di un
+            professionista. Va completato prima della pubblicazione.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .avviso-bozza {
+    margin-top: 3rem;
+    border: 1px solid #5a4a2a;
+    background: rgba(201, 168, 76, 0.06);
+    padding: 1.25rem 1.4rem;
+  }
+  .avviso-bozza p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .avviso-bozza strong {
+    color: var(--gold);
+    font-weight: 400;
+  }
+</style>

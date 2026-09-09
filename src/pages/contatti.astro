@@ -1,0 +1,100 @@
+---
+import Base from '../layouts/Base.astro'
+import {caricaImpostazioni} from '../lib/contenuti'
+import {urlWhatsApp, urlEmail, urlInstagram, utenteInstagram} from '../lib/contatti'
+
+const impostazioni = await caricaImpostazioni()
+
+const whatsapp = urlWhatsApp(
+  impostazioni,
+  'Ciao Alessandro! Ho visto il tuo sito e vorrei parlare di un progetto.',
+)
+const email = urlEmail(impostazioni)
+const instagram = urlInstagram(impostazioni)
+
+const recapiti = [
+  {href: whatsapp, etichetta: 'WhatsApp', valore: impostazioni.whatsapp, esterno: true},
+  {href: email, etichetta: 'Email', valore: impostazioni.email, esterno: false},
+  {href: instagram, etichetta: 'Instagram', valore: `@${utenteInstagram(impostazioni) ?? ''}`, esterno: true},
+].filter((r): r is {href: string; etichetta: string; valore: string; esterno: boolean} =>
+  Boolean(r.href),
+)
+---
+
+<Base
+  titolo="Contatti"
+  descrizione={`Contatta ${impostazioni.nomeArtigiano} per richiedere un coltello artigianale su misura.`}
+  impostazioni={impostazioni}
+>
+  <main id="contenuto-principale">
+    <section class="contacts-wrap" aria-labelledby="titolo-contatti">
+      <div class="divider" style="margin-top:1rem"><span aria-hidden="true">✦</span></div>
+      <p class="s-label">Contatti</p>
+      <h1 class="s-title" id="titolo-contatti">Parliamo di<br />un progetto</h1>
+
+      <p class="contatti-intro">
+        {
+          impostazioni.invitoContatto ||
+            'Ogni coltello nasce da una conversazione. Raccontami cosa hai in mente e realizzeremo insieme qualcosa di unico.'
+        }
+      </p>
+
+      {
+        recapiti.length === 0 ? (
+          <p class="contatti-mancanti">
+            I recapiti non sono ancora stati inseriti nel pannello di gestione.
+          </p>
+        ) : (
+          <div class="contacts-grid">
+            {recapiti.map((r) => (
+              <a
+                href={r.href}
+                class="c-card"
+                {...(r.esterno ? {target: '_blank', rel: 'noopener noreferrer'} : {})}
+              >
+                <span class="c-label">{r.etichetta}</span>
+                <span class="c-val">{r.valore}</span>
+              </a>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        impostazioni.localita && (
+          <p class="contatti-luogo">
+            La bottega è a <strong>{impostazioni.localita}</strong>.
+          </p>
+        )
+      }
+    </section>
+  </main>
+</Base>
+
+<style>
+  .contatti-intro {
+    color: var(--muted);
+    max-width: 500px;
+    margin-bottom: 2.5rem;
+    font-size: 0.95rem;
+    line-height: 1.75;
+  }
+  .contatti-mancanti {
+    color: var(--muted);
+    border: 1px solid var(--border2);
+    padding: 1.25rem;
+  }
+  .contatti-luogo {
+    margin-top: 2.5rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .contatti-luogo strong {
+    color: var(--text);
+    font-weight: 400;
+  }
+  /* Bersaglio comodo da dito su tutta la scheda del recapito. */
+  .c-card {
+    min-height: 88px;
+  }
+</style>

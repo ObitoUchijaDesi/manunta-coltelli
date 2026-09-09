@@ -1,0 +1,85 @@
+---
+import type {Coltello, ImpostazioniSito} from '../lib/tipi'
+import {ETICHETTE_DISPONIBILITA} from '../lib/tipi'
+import {urlWhatsApp} from '../lib/contatti'
+import FotoColtello from './FotoColtello.astro'
+import {LARGHEZZE_SCHEDA} from '../lib/immagini'
+
+interface Props {
+  coltello: Coltello
+  impostazioni: ImpostazioniSito
+  /** Vero per le prime schede: la loro foto non va rimandata. */
+  prioritaria?: boolean
+}
+
+const {coltello, impostazioni, prioritaria = false} = Astro.props
+
+const href = `/coltelli/${coltello.slug}/`
+const whatsapp = urlWhatsApp(
+  impostazioni,
+  `Ciao! Sono interessato al coltello "${coltello.nome}". Puoi darmi più informazioni?`,
+)
+---
+
+<article class="knife-card">
+  {coltello.pezzoUnico && <span class="knife-badge">Pezzo unico</span>}
+
+  <span
+    class={coltello.disponibilita === 'disponibile' ? 'knife-availability' : 'knife-availability off'}
+  >
+    {ETICHETTE_DISPONIBILITA[coltello.disponibilita]}
+  </span>
+
+  <a href={href} class="knife-card-link" tabindex="-1" aria-hidden="true">
+    <FotoColtello
+      immagine={coltello.immaginePrincipale}
+      nomeColtello={coltello.nome}
+      larghezze={LARGHEZZE_SCHEDA}
+      sizes="(max-width: 560px) 92vw, (max-width: 1000px) 45vw, 30vw"
+      prioritaria={prioritaria}
+      class="knife-card-img"
+    />
+  </a>
+
+  <div class="knife-card-body">
+    <h3 class="knife-name">
+      <a href={href} class="knife-name-link">{coltello.nome}</a>
+    </h3>
+
+    {coltello.descrizioneBreve && <p class="knife-short">{coltello.descrizioneBreve}</p>}
+
+    <div class="knife-actions">
+      <a href={href} class="knife-detail-btn">Scopri &rarr;</a>
+
+      {
+        whatsapp && (
+          <a
+            class="knife-wa-btn"
+            href={whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Richiedi informazioni su ${coltello.nome} via WhatsApp`}
+          >
+            Richiedi info
+          </a>
+        )
+      }
+    </div>
+  </div>
+</article>
+
+<style>
+  /* Nel vecchio sito "Scopri" era un <button> che navigava via JavaScript.
+     Ora è un link vero: funziona senza JS, si apre in una nuova scheda con il
+     tasto centrale e lo screen reader lo annuncia per quello che è. */
+  .knife-detail-btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    text-decoration: none;
+  }
+
+  .knife-wa-btn {
+    min-height: 44px;
+  }
+</style>

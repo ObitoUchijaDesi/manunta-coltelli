@@ -1,0 +1,45 @@
+---
+import type {Immagine} from '../lib/tipi'
+import {urlImmagine, srcsetImmagine, altImmagine, dimensioniImmagine} from '../lib/immagini'
+
+interface Props {
+  immagine: Immagine
+  nomeColtello: string
+  larghezze: number[]
+  /** Quanto spazio occupa la foto nella pagina, per far scegliere al browser. */
+  sizes: string
+  /** Solo per la prima foto visibile: viene caricata subito e con priorità. */
+  prioritaria?: boolean
+  indice?: number
+  class?: string
+}
+
+const {
+  immagine,
+  nomeColtello,
+  larghezze,
+  sizes,
+  prioritaria = false,
+  indice,
+  class: classe,
+} = Astro.props
+
+const larghezzaPredefinita = larghezze[Math.floor(larghezze.length / 2)]
+const src = urlImmagine(immagine, larghezzaPredefinita)
+const srcset = srcsetImmagine(immagine, larghezze)
+const alt = altImmagine(immagine, nomeColtello, indice)
+const dimensioni = dimensioniImmagine(immagine)
+---
+
+<img
+  src={src}
+  srcset={srcset}
+  sizes={srcset ? sizes : undefined}
+  alt={alt}
+  width={dimensioni?.larghezza}
+  height={dimensioni?.altezza}
+  loading={prioritaria ? 'eager' : 'lazy'}
+  decoding={prioritaria ? 'sync' : 'async'}
+  fetchpriority={prioritaria ? 'high' : undefined}
+  class={classe}
+/>

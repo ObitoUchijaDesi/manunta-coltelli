@@ -1,0 +1,78 @@
+---
+import Base from '../../layouts/Base.astro'
+import SchedaColtello from '../../components/SchedaColtello.astro'
+import {caricaColtelli, caricaImpostazioni} from '../../lib/contenuti'
+
+const [coltelli, impostazioni] = await Promise.all([caricaColtelli(), caricaImpostazioni()])
+
+const descrizione = `Il catalogo completo dei coltelli artigianali di ${impostazioni.nomeArtigiano}: ${coltelli.length} pezzi forgiati a mano, uno diverso dall'altro.`
+
+const elenco = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Catalogo coltelli',
+  numberOfItems: coltelli.length,
+  itemListElement: coltelli.map((coltello, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: coltello.nome,
+    url: new URL(`/coltelli/${coltello.slug}/`, Astro.site).href,
+  })),
+}
+---
+
+<Base
+  titolo="Catalogo coltelli"
+  descrizione={descrizione}
+  impostazioni={impostazioni}
+  datiStrutturati={elenco}
+>
+  <main id="contenuto-principale">
+    <section class="section" aria-labelledby="titolo-catalogo">
+      <div class="container">
+        <div class="divider"><span aria-hidden="true">✦</span></div>
+        <p class="s-label">Collezione</p>
+        <h1 class="s-title" id="titolo-catalogo">Catalogo coltelli</h1>
+
+        {
+          coltelli.length === 0 ? (
+            <p class="catalogo-vuoto">
+              Il catalogo è in preparazione. Scrivi ad Alessandro per sapere cosa è disponibile.
+            </p>
+          ) : (
+            <>
+              <p class="catalogo-conteggio">
+                {coltelli.length === 1 ? 'Un coltello' : `${coltelli.length} coltelli`} in catalogo.
+                Ognuno è fatto a mano, quindi non ce n'è uno identico a un altro.
+              </p>
+
+              <div class="knives-grid">
+                {coltelli.map((coltello, i) => (
+                  <SchedaColtello
+                    coltello={coltello}
+                    impostazioni={impostazioni}
+                    prioritaria={i < 3}
+                  />
+                ))}
+              </div>
+            </>
+          )
+        }
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .catalogo-conteggio {
+    color: var(--muted);
+    max-width: 55ch;
+    margin: 0 0 3rem;
+    font-size: 0.95rem;
+    line-height: 1.75;
+  }
+  .catalogo-vuoto {
+    color: var(--muted);
+    padding-top: 1rem;
+  }
+</style>

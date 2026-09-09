@@ -1,0 +1,159 @@
+---
+import {ANTEPRIMA_LOCALE} from '../lib/contenuti'
+import type {ImpostazioniSito} from '../lib/tipi'
+import Navbar from '../components/Navbar.astro'
+import Footer from '../components/Footer.astro'
+import WhatsAppFloat from '../components/WhatsAppFloat.astro'
+import '../styles/global.css'
+
+interface Props {
+  titolo: string
+  descrizione: string
+  impostazioni: ImpostazioniSito
+  /** Indirizzo assoluto della foto per l'anteprima social. */
+  immagineSocial?: string
+  tipoOg?: 'website' | 'article'
+  noindex?: boolean
+  datiStrutturati?: Record<string, unknown> | Record<string, unknown>[]
+}
+
+const {
+  titolo,
+  descrizione,
+  impostazioni,
+  immagineSocial,
+  tipoOg = 'website',
+  noindex = false,
+  datiStrutturati,
+} = Astro.props
+
+const SITO = 'Alessandro Manunta Coltelli'
+const titoloCompleto = titolo === SITO ? titolo : `${titolo} — ${SITO}`
+
+// Astro.site arriva da astro.config.mjs. Serve assoluto: WhatsApp e Facebook
+// non seguono gli indirizzi relativi quando costruiscono l'anteprima.
+const canonical = new URL(Astro.url.pathname, Astro.site).href
+const ogImage = immagineSocial ?? new URL('/social-default.jpg', Astro.site).href
+
+const jsonLd = datiStrutturati
+  ? Array.isArray(datiStrutturati)
+    ? datiStrutturati
+    : [datiStrutturati]
+  : []
+---
+
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{titoloCompleto}</title>
+    <meta name="description" content={descrizione} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content={noindex ? 'noindex,nofollow' : 'index,follow'} />
+
+    {/* Anteprima quando il link viene mandato su WhatsApp, Instagram, Telegram,
+        Facebook. Sono scritte qui, nell'HTML che parte dal server: nessuno di
+        questi servizi esegue JavaScript per generare l'anteprima. */}
+    <meta property="og:type" content={tipoOg} />
+    <meta property="og:site_name" content={SITO} />
+    <meta property="og:title" content={titoloCompleto} />
+    <meta property="og:description" content={descrizione} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="it_IT" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={titoloCompleto} />
+    <meta name="twitter:description" content={descrizione} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <meta name="theme-color" content="#0a0a0a" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {/* TODO (STEP 21): questi font vanno ospitati sul nostro dominio.
+        Caricandoli da Google l'indirizzo IP di ogni visitatore arriva a Google,
+        cosa che in UE va dichiarata e che possiamo semplicemente evitare. */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"
+    />
+
+    {
+      jsonLd.map((dato) => (
+        <script type="application/ld+json" is:inline set:html={JSON.stringify(dato)} />
+      ))
+    }
+  </head>
+
+  <body>
+    {
+      ANTEPRIMA_LOCALE && (
+        <div class="fascia-anteprima" role="status">
+          ANTEPRIMA LOCALE — contenuti del vecchio sito, non quelli veri. Non pubblicare.
+        </div>
+      )
+    }
+
+    <a href="#contenuto-principale" class="skip-link">Salta al contenuto principale</a>
+
+    <Navbar />
+
+    <slot />
+
+    <Footer impostazioni={impostazioni} />
+    <WhatsAppFloat impostazioni={impostazioni} />
+
+    <script>
+      // Menu del telefono. È l'unico JavaScript del sito pubblico: tutto il
+      // resto è HTML già pronto.
+      const bottone = document.querySelector<HTMLButtonElement>('.hamburger')
+      const menu = document.querySelector<HTMLElement>('.mobile-nav')
+
+      if (bottone && menu) {
+        const chiudi = () => {
+          menu.classList.remove('open')
+          bottone.classList.remove('open')
+          bottone.setAttribute('aria-expanded', 'false')
+        }
+
+        bottone.addEventListener('click', () => {
+          const aperto = menu.classList.toggle('open')
+          bottone.classList.toggle('open', aperto)
+          bottone.setAttribute('aria-expanded', String(aperto))
+        })
+
+        menu.querySelectorAll('a').forEach((link) => link.addEventListener('click', chiudi))
+        document.addEventListener('keydown', (e) => e.key === 'Escape' && chiudi())
+      }
+
+      // La barra in alto si scurisce quando si scorre.
+      const navbar = document.querySelector('.navbar')
+      if (navbar) {
+        const aggiorna = () => navbar.classList.toggle('scrolled', window.scrollY > 60)
+        aggiorna()
+        window.addEventListener('scroll', aggiorna, {passive: true})
+      }
+    </script>
+  </body>
+</html>
+
+<style>
+  .fascia-anteprima {
+    position: sticky;
+    top: 0;
+    z-index: 500;
+    background: #7a2f2f;
+    color: #fff;
+    text-align: center;
+    padding: 0.6rem 1rem;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+</style>

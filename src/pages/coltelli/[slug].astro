@@ -1,0 +1,353 @@
+---
+import Base from '../../layouts/Base.astro'
+import FotoColtello from '../../components/FotoColtello.astro'
+import {caricaColtelli, caricaImpostazioni} from '../../lib/contenuti'
+import {LARGHEZZE_DETTAGLIO, urlSocial} from '../../lib/immagini'
+import {urlWhatsApp, urlEmail} from '../../lib/contatti'
+import {ETICHETTE_DISPONIBILITA, ETICHETTE_CATEGORIA} from '../../lib/tipi'
+import type {Coltello, ImpostazioniSito} from '../../lib/tipi'
+
+/**
+ * Una pagina HTML vera per ogni coltello pubblicato.
+ *
+ * È il motivo principale di tutta la migrazione: quando Alessandro manda
+ * questo indirizzo su WhatsApp, l'anteprima mostra la foto di QUESTO coltello.
+ * Con il vecchio sito a pagina singola compariva sempre il logo, perché
+ * WhatsApp non esegue JavaScript per costruire l'anteprima.
+ */
+export async function getStaticPaths() {
+  const [coltelli, impostazioni] = await Promise.all([caricaColtelli(), caricaImpostazioni()])
+
+  return coltelli.map((coltello) => ({
+    params: {slug: coltello.slug},
+    props: {coltello, impostazioni, coltelli},
+  }))
+}
+
+interface Props {
+  coltello: Coltello
+  impostazioni: ImpostazioniSito
+  coltelli: Coltello[]
+}
+
+const {coltello, impostazioni, coltelli} = Astro.props
+
+const whatsapp = urlWhatsApp(
+  impostazioni,
+  `Ciao Alessandro, sono interessato al coltello "${coltello.nome}". Potresti darmi maggiori informazioni?`,
+)
+const email = urlEmail(impostazioni, `Informazioni su "${coltello.nome}"`)
+
+const descrizione =
+  coltello.descrizioneBreve?.trim() ||
+  coltello.descrizione?.trim().slice(0, 155) ||
+  `${coltello.nome}, coltello artigianale forgiato a mano.`
+
+const immagineSocial = urlSocial(coltello.immaginePrincipale, Astro.site)
+
+const materiali = [
+  {etichetta: 'Lama', valore: coltello.materialeLama},
+  {etichetta: 'Manico', valore: coltello.materialeManico},
+  {etichetta: 'Altro', valore: coltello.altriMateriali},
+].filter((m) => m.valore?.trim())
+
+const misure = [
+  {etichetta: 'Lunghezza totale', valore: coltello.lunghezzaTotale},
+  {etichetta: 'Lunghezza lama', valore: coltello.lunghezzaLama},
+].filter((m) => typeof m.valore === 'number')
+
+// Solo proprietà che descrivono l'oggetto. Nessun prezzo, nessuna offerta,
+// nessuna disponibilità commerciale: il sito non vende.
+const schedaProdotto: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: coltello.nome,
+  description: descrizione,
+  ...(immagineSocial ? {image: immagineSocial} : {}),
+  brand: {'@type': 'Brand', name: `${impostazioni.nomeArtigiano} Coltelli`},
+}
+
+const materialeSchema = [coltello.materialeLama, coltello.materialeManico]
+  .filter(Boolean)
+  .join(', ')
+if (materialeSchema) schedaProdotto.material = materialeSchema
+if (coltello.categoria) schedaProdotto.category = ETICHETTE_CATEGORIA[coltello.categoria]
+
+const briciole = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {'@type': 'ListItem', position: 1, name: 'Home', item: Astro.site?.href},
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Coltelli',
+      item: new URL('/coltelli/', Astro.site).href,
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: coltello.nome,
+      item: new URL(`/coltelli/${coltello.slug}/`, Astro.site).href,
+    },
+  ],
+}
+
+const posizione = coltelli.findIndex((c) => c.slug === coltello.slug)
+const precedente = posizione > 0 ? coltelli[posizione - 1] : null
+const successivo = posizione < coltelli.length - 1 ? coltelli[posizione + 1] : null
+---
+
+<Base
+  titolo={coltello.nome}
+  descrizione={descrizione}
+  impostazioni={impostazioni}
+  immagineSocial={immagineSocial}
+  tipoOg="article"
+  datiStrutturati={[schedaProdotto, briciole]}
+>
+  <main id="contenuto-principale">
+    <div class="detail-wrap">
+      <nav class="briciole" aria-label="Percorso">
+        <a href="/">Home</a>
+        <span aria-hidden="true">/</span>
+        <a href="/coltelli/">Coltelli</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{coltello.nome}</span>
+      </nav>
+
+      <div class="detail-grid">
+        <div class="gallery">
+          <FotoColtello
+            immagine={coltello.immaginePrincipale}
+            nomeColtello={coltello.nome}
+            larghezze={LARGHEZZE_DETTAGLIO}
+            sizes="(max-width: 900px) 94vw, 55vw"
+            prioritaria={true}
+            class="gallery-main"
+          />
+
+          {
+            coltello.galleria.length > 0 && (
+              <div class="gallery-altre">
+                {coltello.galleria.map((foto, i) => (
+                  <FotoColtello
+                    immagine={foto}
+                    nomeColtello={coltello.nome}
+                    larghezze={LARGHEZZE_DETTAGLIO}
+                    sizes="(max-width: 900px) 94vw, 55vw"
+                    indice={i + 2}
+                    class="gallery-secondaria"
+                  />
+                ))}
+              </div>
+            )
+          }
+        </div>
+
+        <div class="detail-info">
+          <div class="detail-etichette">
+            {coltello.pezzoUnico && <span class="detail-badge">Pezzo unico</span>}
+            {
+              coltello.categoria && (
+                <span class="detail-categoria">{ETICHETTE_CATEGORIA[coltello.categoria]}</span>
+              )
+            }
+            <span
+              class={coltello.disponibilita === 'disponibile' ? 'detail-status' : 'detail-status off'}
+            >
+              {ETICHETTE_DISPONIBILITA[coltello.disponibilita]}
+            </span>
+          </div>
+
+          <h1 class="detail-name">{coltello.nome}</h1>
+
+          {coltello.descrizione && <p class="detail-desc">{coltello.descrizione}</p>}
+
+          {
+            materiali.length > 0 && (
+              <div class="detail-materials">
+                <h2 class="detail-materials-title">Materiali</h2>
+                <dl class="scheda-tecnica">
+                  {materiali.map((m) => (
+                    <>
+                      <dt>{m.etichetta}</dt>
+                      <dd>{m.valore}</dd>
+                    </>
+                  ))}
+                </dl>
+              </div>
+            )
+          }
+
+          {
+            (misure.length > 0 || coltello.anno) && (
+              <div class="detail-materials">
+                <h2 class="detail-materials-title">Caratteristiche</h2>
+                <dl class="scheda-tecnica">
+                  {misure.map((m) => (
+                    <>
+                      <dt>{m.etichetta}</dt>
+                      <dd>{m.valore} cm</dd>
+                    </>
+                  ))}
+                  {coltello.anno && (
+                    <>
+                      <dt>Anno</dt>
+                      <dd>{coltello.anno}</dd>
+                    </>
+                  )}
+                </dl>
+              </div>
+            )
+          }
+
+          <div class="detail-azioni">
+            {
+              whatsapp && (
+                <a href={whatsapp} target="_blank" rel="noopener noreferrer" class="detail-wa">
+                  Richiedi informazioni su WhatsApp
+                </a>
+              )
+            }
+            {email && <a href={email} class="btn-ghost detail-email">Scrivi una email</a>}
+          </div>
+        </div>
+      </div>
+
+      {
+        (precedente || successivo) && (
+          <nav class="sfoglia" aria-label="Altri coltelli">
+            {precedente ? (
+              <a href={`/coltelli/${precedente.slug}/`} class="sfoglia-link">
+                <span class="sfoglia-etichetta">← Precedente</span>
+                <span class="sfoglia-nome">{precedente.nome}</span>
+              </a>
+            ) : (
+              <span />
+            )}
+            {successivo && (
+              <a href={`/coltelli/${successivo.slug}/`} class="sfoglia-link sfoglia-destra">
+                <span class="sfoglia-etichetta">Successivo →</span>
+                <span class="sfoglia-nome">{successivo.nome}</span>
+              </a>
+            )}
+          </nav>
+        )
+      }
+    </div>
+  </main>
+</Base>
+
+<style>
+  .briciole {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+  .briciole a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .briciole a:hover {
+    color: var(--gold);
+  }
+
+  .detail-etichette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .detail-categoria {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--border2);
+    padding: 0.3rem 0.7rem;
+  }
+
+  .gallery-altre {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .gallery-main,
+  .gallery-secondaria {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .scheda-tecnica {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.4rem 1.25rem;
+    margin: 0;
+  }
+  .scheda-tecnica dt {
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .scheda-tecnica dd {
+    margin: 0;
+    color: var(--text);
+    font-size: 0.92rem;
+  }
+
+  .detail-azioni {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    margin-top: 2rem;
+  }
+
+  .detail-email {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .sfoglia {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: 5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .sfoglia-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-decoration: none;
+    min-height: 44px;
+  }
+  .sfoglia-destra {
+    text-align: right;
+    margin-left: auto;
+  }
+  .sfoglia-etichetta {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .sfoglia-nome {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    color: var(--text);
+  }
+  .sfoglia-link:hover .sfoglia-nome {
+    color: var(--gold);
+  }
+</style>
