@@ -50,6 +50,17 @@ const QUERY_IMPOSTAZIONI = `*[_type == "impostazioniSito"][0] {
     passaggiLavorazione[] { titolo, testo }
   }`
 
+/**
+ * Toglie spazi in testa e in coda ai testi che arrivano dal pannello.
+ *
+ * Scoperto provando davvero: scrivendo da telefono è facilissimo lasciare uno
+ * spazio in fondo a un nome, e la tastiera a volte lo aggiunge da sola. Quello
+ * spazio finiva nel titolo della pagina ("Coltello prova  — ..."), nel
+ * messaggio WhatsApp e nei dati strutturati. Non è un errore di chi scrive:
+ * è il sito che deve ripulire.
+ */
+const pulisci = (testo: unknown): string => (typeof testo === 'string' ? testo.trim() : '')
+
 function fermaIlBuild(cosaManca: string): never {
   throw new Error(
     `\n\nBUILD INTERROTTO: ${cosaManca}\n\n` +
@@ -107,13 +118,13 @@ export async function caricaColtelli(): Promise<Coltello[]> {
     .map(
       (c): Coltello => ({
         slug: c.slug,
-        nome: c.nome ?? '',
-        descrizioneBreve: c.descrizioneBreve ?? '',
-        descrizione: c.descrizione ?? '',
+        nome: pulisci(c.nome),
+        descrizioneBreve: pulisci(c.descrizioneBreve),
+        descrizione: pulisci(c.descrizione),
         categoria: c.categoria,
-        materialeLama: c.materialeLama,
-        materialeManico: c.materialeManico,
-        altriMateriali: c.altriMateriali,
+        materialeLama: pulisci(c.materialeLama) || undefined,
+        materialeManico: pulisci(c.materialeManico) || undefined,
+        altriMateriali: pulisci(c.altriMateriali) || undefined,
         lunghezzaTotale: c.lunghezzaTotale,
         lunghezzaLama: c.lunghezzaLama,
         anno: c.anno,
@@ -157,6 +168,17 @@ export async function caricaImpostazioni(): Promise<ImpostazioniSito> {
 
   return {
     ...dati,
-    passaggiLavorazione: dati.passaggiLavorazione ?? [],
+    nomeArtigiano: pulisci(dati.nomeArtigiano),
+    presentazioneBreve: pulisci(dati.presentazioneBreve),
+    biografia: pulisci(dati.biografia),
+    invitoContatto: pulisci(dati.invitoContatto),
+    localita: pulisci(dati.localita) || undefined,
+    whatsapp: pulisci(dati.whatsapp) || undefined,
+    email: pulisci(dati.email) || undefined,
+    instagram: pulisci(dati.instagram) || undefined,
+    passaggiLavorazione: (dati.passaggiLavorazione ?? []).map((p) => ({
+      titolo: pulisci(p.titolo),
+      testo: pulisci(p.testo),
+    })),
   }
 }
