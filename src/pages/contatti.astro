@@ -20,7 +20,7 @@ import {urlWhatsApp, urlEmail, urlInstagram, utenteInstagram, messaggi} from '..
 const impostazioni = await caricaImpostazioni()
 
 const whatsapp = urlWhatsApp(impostazioni, messaggi.generico)
-const email = urlEmail(impostazioni, messaggi.oggettoEmail())
+const email = urlEmail(impostazioni, messaggi.oggettoEmail(), messaggi.corpoEmail())
 const instagram = urlInstagram(impostazioni)
 const nomeInstagram = utenteInstagram(impostazioni)
 

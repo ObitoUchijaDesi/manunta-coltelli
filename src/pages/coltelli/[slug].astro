@@ -33,7 +33,11 @@ interface Props {
 const {coltello, impostazioni, coltelli} = Astro.props
 
 const whatsapp = urlWhatsApp(impostazioni, messaggi.perColtello(coltello.nome))
-const email = urlEmail(impostazioni, messaggi.oggettoEmail(coltello.nome))
+const email = urlEmail(
+  impostazioni,
+  messaggi.oggettoEmail(coltello.nome),
+  messaggi.corpoEmail(coltello.nome),
+)
 
 const descrizione =
   coltello.descrizioneBreve?.trim() ||

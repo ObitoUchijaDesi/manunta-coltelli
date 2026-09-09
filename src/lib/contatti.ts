@@ -26,10 +26,26 @@ export function urlWhatsApp(impostazioni: ImpostazioniSito, messaggio?: string):
   return `https://wa.me/${numero}${testo}`
 }
 
-export function urlEmail(impostazioni: ImpostazioniSito, oggetto?: string): string | null {
+/**
+ * Link mailto con oggetto e prima riga già scritti.
+ *
+ * I parametri passano da encodeURIComponent: senza, un accento o un "&" nel
+ * nome di un coltello troncherebbero l'indirizzo a metà.
+ */
+export function urlEmail(
+  impostazioni: ImpostazioniSito,
+  oggetto?: string,
+  corpo?: string,
+): string | null {
   const email = impostazioni.email?.trim()
   if (!email || !email.includes('@')) return null
-  return oggetto ? `mailto:${email}?subject=${encodeURIComponent(oggetto)}` : `mailto:${email}`
+
+  const parametri = new URLSearchParams()
+  if (oggetto) parametri.set('subject', oggetto)
+  if (corpo) parametri.set('body', corpo)
+
+  const stringa = parametri.toString().replace(/\+/g, '%20')
+  return stringa ? `mailto:${email}?${stringa}` : `mailto:${email}`
 }
 
 export function utenteInstagram(impostazioni: ImpostazioniSito): string | null {
@@ -50,11 +66,26 @@ export function urlInstagram(impostazioni: ImpostazioniSito): string | null {
  * cronologia del browser o nei log di chi sta in mezzo.
  */
 export const messaggi = {
-  generico: 'Buongiorno Alessandro, vorrei informazioni sui suoi coltelli.',
+  /** Testo di WhatsApp dalle pagine che non parlano di un coltello preciso. */
+  generico: 'Buongiorno Alessandro, vorrei avere alcune informazioni sui tuoi coltelli.',
+
+  /** Testo di WhatsApp dalla pagina di un coltello. */
   perColtello: (nomeColtello: string) =>
-    `Buongiorno Alessandro, vorrei informazioni su ${nomeColtello}.`,
+    `Buongiorno Alessandro, vorrei informazioni sul coltello ${nomeColtello}.`,
+
   oggettoEmail: (nomeColtello?: string) =>
-    nomeColtello ? `Informazioni su ${nomeColtello}` : 'Richiesta di informazioni',
+    nomeColtello
+      ? `Informazioni su ${nomeColtello}`
+      : 'Richiesta informazioni — Alessandro Manunta Coltelli',
+
+  /**
+   * Prima riga della email. Solo un'apertura: quello che il visitatore vuole
+   * dire lo scrive lui, e non mettiamo nulla che lo riguardi nell'indirizzo.
+   */
+  corpoEmail: (nomeColtello?: string) =>
+    nomeColtello
+      ? `Buongiorno Alessandro,\n\nvorrei informazioni sul coltello ${nomeColtello}.\n\n`
+      : 'Buongiorno Alessandro,\n\nvorrei avere alcune informazioni sui suoi coltelli.\n\n',
 }
 
 /** Vero se manca qualunque recapito: il sito non è pronto per la pubblicazione. */
