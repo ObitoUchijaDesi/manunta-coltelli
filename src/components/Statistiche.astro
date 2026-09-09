@@ -1,0 +1,33 @@
+---
+/**
+ * Statistiche di visita — spente finché non si decide di accenderle.
+ *
+ * Si attivano impostando CLOUDFLARE_ANALYTICS_TOKEN fra le variabili di
+ * Cloudflare Pages. Senza token qui non viene stampato niente: nessuno script,
+ * nessuna richiesta, nessuno storage nel browser.
+ *
+ * Perché Cloudflare Web Analytics e non Google Analytics: il sito è già
+ * ospitato su Cloudflare, non serve un altro fornitore, ed è pensato per non
+ * usare cookie né identificatori persistenti — che è la condizione per non
+ * dover mettere un banner di consenso.
+ *
+ * PENDING: prima di accenderlo va verificato sulla documentazione corrente di
+ * Cloudflare che il beacon non usi cookie o storage locale e quali dati
+ * raccolga. Se dovesse usarli, la scelta va rifatta: senza quella verifica
+ * l'assenza del banner non è difendibile.
+ */
+
+const token =
+  import.meta.env.CLOUDFLARE_ANALYTICS_TOKEN || process.env.CLOUDFLARE_ANALYTICS_TOKEN
+---
+
+{
+  token && (
+    <script
+      defer
+      is:inline
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon={JSON.stringify({token})}
+    />
+  )
+}

@@ -4,6 +4,7 @@ import type {ImpostazioniSito} from '../lib/tipi'
 import Navbar from '../components/Navbar.astro'
 import Footer from '../components/Footer.astro'
 import WhatsAppFloat from '../components/WhatsAppFloat.astro'
+import Statistiche from '../components/Statistiche.astro'
 import '../styles/font.css'
 import '../styles/global.css'
 
@@ -114,6 +115,7 @@ const jsonLd = datiStrutturati
 
     <Footer impostazioni={impostazioni} />
     <WhatsAppFloat impostazioni={impostazioni} />
+    <Statistiche />
 
     <script>
       // Menu del telefono. È l'unico JavaScript del sito pubblico: tutto il
