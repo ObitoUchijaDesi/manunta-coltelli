@@ -1,0 +1,116 @@
+{
+  "_nota": [
+    "Estrazione manuale dei contenuti REALI dal vecchio sito React.",
+    "Fonte: legacy/src/context/SiteContext.jsx (oggetto DEFAULT) e legacy/src/pages/Home.jsx.",
+    "",
+    "Regole seguite:",
+    "- Nessun dato inventato. Dove il vecchio sito non aveva l'informazione, il campo resta vuoto",
+    "  ed è elencato in 'daVerificare'.",
+    "- I recapiti del vecchio sito erano tutti segnaposto: NON vengono importati.",
+    "- Il campo 'emoji' del vecchio schema è stato scartato: non è un'informazione.",
+    "- Il campo 'badge' è stato tradotto in un campo semantico dove il testo lo permetteva,",
+    "  altrimenti scartato.",
+    "- I coltelli vengono importati come BOZZE, non pubblicati: Alessandro li rivede dal",
+    "  telefono e pubblica lui. Nulla va online senza che qualcuno lo abbia confermato."
+  ],
+
+  "coltelli": [
+    {
+      "slug": "cinghiale",
+      "ordine": 1,
+      "nome": "Cinghiale",
+      "descrizioneBreve": "Coltello artigianale forgiato a mano, carattere robusto e anima sarda.",
+      "descrizione": "Il Cinghiale nasce per chi cerca un coltello che sappia raccontare una storia. Forgiato a mano nella bottega di Alessandro Manunta, ogni dettaglio riflette la tradizione coltellieristica sarda unita a una ricerca estetica moderna.",
+      "disponibilita": "disponibile",
+      "pezzoUnico": false,
+      "immagini": ["cinghiale/01.jpeg", "cinghiale/02.jpeg"],
+      "daVerificare": [
+        "categoria: il nome suggerisce la caccia ma il vecchio sito non lo dichiarava",
+        "materialeLama e materialeManico: nel vecchio sito il campo materiali era vuoto",
+        "disponibilita: nel vecchio sito era il valore predefinito, mai gestito davvero",
+        "lunghezzaTotale e lunghezzaLama: mai presenti",
+        "anno: mai presente"
+      ]
+    },
+    {
+      "slug": "logudoro",
+      "ordine": 2,
+      "nome": "Logudoro",
+      "descrizioneBreve": "Eleganza e precisione in ogni linea, un coltello che porta il nome della terra.",
+      "descrizione": "Il Logudoro prende il nome dall'antica regione storica della Sardegna, terra di cultura e tradizione. Questo coltello ne incarna lo spirito: essenziale, nobile, preciso.",
+      "disponibilita": "disponibile",
+      "pezzoUnico": false,
+      "immagini": ["logudoro.jpeg"],
+      "daVerificare": [
+        "categoria: non deducibile dal testo esistente",
+        "materialeLama e materialeManico: nel vecchio sito il campo materiali era vuoto",
+        "disponibilita: nel vecchio sito era il valore predefinito, mai gestito davvero",
+        "una sola fotografia: potrebbero servirne altre",
+        "lunghezze e anno: mai presenti"
+      ]
+    },
+    {
+      "slug": "resolza-classica",
+      "ordine": 3,
+      "nome": "Resolza Classica",
+      "descrizioneBreve": "La resolza sarda nella sua forma più pura: tradizione, forma e identità.",
+      "descrizione": "La Resolza è il coltello più rappresentativo della tradizione coltellieristica sarda. Questa versione classica rispetta fedelmente le proporzioni e le geometrie originali.",
+      "categoria": "resolza",
+      "disponibilita": "disponibile",
+      "pezzoUnico": false,
+      "immagini": ["resolza-classica/01.jpeg", "resolza-classica/02.jpeg"],
+      "_mappatura": "Il vecchio badge 'Tradizionale' è stato tradotto in categoria 'resolza', che il testo della descrizione afferma esplicitamente. Il badge come campo libero è stato eliminato.",
+      "daVerificare": [
+        "materialeLama e materialeManico: nel vecchio sito il campo materiali era vuoto",
+        "disponibilita: nel vecchio sito era il valore predefinito, mai gestito davvero",
+        "lunghezze e anno: mai presenti"
+      ]
+    }
+  ],
+
+  "impostazioniSito": {
+    "nomeArtigiano": "Alessandro Manunta",
+    "presentazioneBreve": "Artigiano coltelliero sardo. Ogni lama è un'opera d'arte forgiata con passione, tradizione e rispetto per la materia.",
+    "biografia": "Sono Alessandro Manunta, coltelliere artigiano con sede in Sardegna. Da oltre vent'anni creo coltelli unici, forgiando ogni lama con cura maniacale e rispetto per le tecniche tradizionali. Ogni pezzo che esce dalla mia bottega è frutto di ore di lavoro, passione e un profondo legame con la cultura e le tradizioni della mia terra.",
+    "invitoContatto": "Ogni coltello nasce da una conversazione. Raccontami cosa hai in mente e realizzeremo insieme qualcosa di unico.",
+    "passaggiLavorazione": [
+      {
+        "titolo": "Contatto",
+        "testo": "Parliamo del tuo progetto: che tipo di coltello vuoi, per quale uso, con quali materiali. Niente moduli complicati — basta un messaggio."
+      },
+      {
+        "titolo": "Progetto",
+        "testo": "Definisco insieme a te ogni dettaglio: lunghezza della lama, forma del manico, finiture, incisioni. Ti mostro bozzetti o esempi simili."
+      },
+      {
+        "titolo": "Forgia",
+        "testo": "La lama prende vita nella mia bottega in Sardegna. Ogni passaggio — dalla forgiatura alla rifinitura — è fatto a mano, senza fretta."
+      },
+      {
+        "titolo": "Consegna",
+        "testo": "Il tuo coltello è pronto, firmato e certificato. Ti invio foto dettagliate prima della spedizione o del ritiro di persona."
+      }
+    ],
+    "_esclusiVolutamente": {
+      "whatsapp": "'+39 000 000 0000' — segnaposto, non importato",
+      "email": "'info@alessandromanunta.it' — segnaposto, non importato",
+      "instagram": "'@alessandromanunta' — profilo mai verificato, non importato",
+      "localita": "il vecchio sito diceva solo 'Sardegna', troppo generico per le ricerche locali"
+    },
+    "daVerificare": [
+      "biografia: contiene l'affermazione 'da oltre vent'anni', da confermare con Alessandro",
+      "localita: serve il paese e la provincia per farsi trovare in zona",
+      "whatsapp, email, instagram: tutti da inserire prima della pubblicazione"
+    ]
+  },
+
+  "_affermazioniNonImportate": {
+    "_nota": "Il vecchio sito mostrava tre numeri nella sezione di presentazione. Nessuno di questi è verificabile e uno appare inventato: non vengono portati nel nuovo sito. Se Alessandro li conferma si rimettono in due minuti.",
+    "voci": [
+      "'20+ anni di esperienza' — coerente con la biografia ma mai confermato",
+      "'500+ lame create' — nessuna fonte, con ogni probabilità inventato",
+      "'100% artigianato manuale' — affermazione commerciale, non un dato",
+      "'priceRange: €€–€€€' nei dati strutturati — un prezzo inventato dichiarato a Google"
+    ]
+  }
+}
