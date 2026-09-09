@@ -27,17 +27,15 @@ const whatsapp = urlWhatsApp(impostazioni, messaggi.perColtello(coltello.nome))
     {ETICHETTE_DISPONIBILITA[coltello.disponibilita]}
   </span>
 
-  <div class="knife-card-media">
-    <a href={href} class="knife-card-link" tabindex="-1" aria-hidden="true" data-inclina>
-      <FotoColtello
-        immagine={coltello.immaginePrincipale}
-        nomeColtello={coltello.nome}
-        larghezze={LARGHEZZE_SCHEDA}
-        sizes="(max-width: 560px) 92vw, (max-width: 1000px) 45vw, 30vw"
-        prioritaria={prioritaria}
-        class="knife-card-img"
-      />
-    </a>
+  <div class="knife-card-media" data-inclina>
+    <FotoColtello
+      immagine={coltello.immaginePrincipale}
+      nomeColtello={coltello.nome}
+      larghezze={LARGHEZZE_SCHEDA}
+      sizes="(max-width: 560px) 92vw, (max-width: 1000px) 45vw, 30vw"
+      prioritaria={prioritaria}
+      class="knife-card-img"
+    />
 
     {
     /* Il pallino sta sopra la fotografia, fuori dal link della scheda: è un
@@ -68,21 +66,51 @@ const whatsapp = urlWhatsApp(impostazioni, messaggi.perColtello(coltello.nome))
 
     {coltello.descrizioneBreve && <p class="knife-short">{coltello.descrizioneBreve}</p>}
 
+    {/* Non è un link: tutta la scheda lo è già. Resta come segnale visivo
+        che qui si può entrare, e la freccia si sposta al passaggio. */}
     <div class="knife-actions">
-      <a href={href} class="knife-detail-btn">Scopri &rarr;</a>
+      <span class="knife-detail-btn" aria-hidden="true">
+        Scopri <span class="knife-freccia">&rarr;</span>
+      </span>
     </div>
   </div>
 </article>
 
 <style>
-  /* Nel vecchio sito "Scopri" era un <button> che navigava via JavaScript.
-     Ora è un link vero: funziona senza JS, si apre in una nuova scheda con il
-     tasto centrale e lo screen reader lo annuncia per quello che è. */
+  /* Tutta la scheda è cliccabile.
+     Il collegamento vero è uno solo — quello sul nome — e si allarga a
+     coprire l'intera scheda con uno pseudo-elemento. Così il bersaglio è
+     grande quanto la scheda, ma chi usa uno screen reader sente un unico
+     collegamento chiamato col nome del coltello, invece di tre che portano
+     tutti nello stesso posto. */
+  .knife-name-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  /* "Scopri" non è più un link: è un'indicazione. La freccia si sposta
+     quando il dito o il mouse sono sulla scheda. */
   .knife-detail-btn {
     display: inline-flex;
     align-items: center;
+    gap: 0.4rem;
     min-height: 44px;
-    text-decoration: none;
+  }
+
+  .knife-freccia {
+    transition: transform 0.3s ease;
+  }
+
+  .knife-card:hover .knife-freccia {
+    transform: translateX(5px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .knife-freccia {
+      transition: none;
+    }
   }
 
   /* Contenitore della fotografia: serve solo ad ancorare il pallino. */

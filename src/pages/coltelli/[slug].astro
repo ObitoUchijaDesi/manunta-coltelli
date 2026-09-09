@@ -109,13 +109,14 @@ const successivo = posizione < coltelli.length - 1 ? coltelli[posizione + 1] : n
 >
   <main id="contenuto-principale">
     <div class="detail-wrap">
-      <nav class="briciole" aria-label="Percorso">
-        <a href="/">Home</a>
-        <span aria-hidden="true">/</span>
-        <a href="/coltelli/">Coltelli</a>
-        <span aria-hidden="true">/</span>
-        <span aria-current="page">{coltello.nome}</span>
-      </nav>
+      {/* Una sola azione chiara invece della fila di briciole: da una scheda
+          si vuole tornare al catalogo, non risalire tutta la gerarchia.
+          I dati strutturati BreadcrumbList restano, quindi Google continua a
+          vedere la gerarchia anche se qui non è disegnata. */}
+      <a href="/coltelli/" class="torna-indietro">
+        <span class="torna-freccia" aria-hidden="true">←</span>
+        Torna al catalogo
+      </a>
 
       <div class="detail-grid">
         <GalleriaColtello coltello={coltello} />
@@ -215,26 +216,37 @@ const successivo = posizione < coltelli.length - 1 ? coltelli[posizione + 1] : n
 </Base>
 
 <style>
-  .briciole {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.78rem;
-    color: var(--muted);
-    margin-bottom: 2rem;
-  }
-  .briciole a {
-    color: var(--muted);
-    text-decoration: none;
-    /* Area toccabile da 24px anche se il testo è più basso: sono link in
-       linea, quindi l'eccezione WCAG 2.5.8 li coprirebbe comunque, ma su un
-       telefono restano scomodi da centrare col dito. */
+  .torna-indietro {
     display: inline-flex;
     align-items: center;
-    min-height: 24px;
+    gap: 0.6rem;
+    min-height: 44px;
+    margin-bottom: 2rem;
+    font-size: 0.76rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: color 0.3s;
   }
-  .briciole a:hover {
+
+  .torna-indietro:hover {
     color: var(--gold);
+  }
+
+  .torna-freccia {
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: transform 0.3s ease;
+  }
+
+  .torna-indietro:hover .torna-freccia {
+    transform: translateX(-5px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .torna-freccia {
+      transition: none;
+    }
   }
 
   .detail-etichette {
