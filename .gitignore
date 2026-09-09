@@ -23,6 +23,10 @@ legacy/
 tmp/
 temp/
 
+# Generati dagli script: si rifanno con "npm run prepara-migrazione"
+scripts/migrazione/
+public/anteprima/
+
 # Sistema operativo
 .DS_Store
 Thumbs.db
