@@ -1,0 +1,101 @@
+---
+/**
+ * Movimento legato al cursore.
+ *
+ * Due effetti, scelti perché dicono qualcosa dell'oggetto invece di essere
+ * decorazione generica:
+ *
+ * 1. La luce dell'apertura segue il puntatore, come il riflesso che corre su
+ *    una lama lucidata quando la giri.
+ * 2. Le fotografie si spostano di pochi pixel dentro la loro cornice, come se
+ *    stessi inclinando l'oggetto per guardarlo meglio.
+ *
+ * Non parte se: il dispositivo non ha un puntatore fine (telefoni e tablet,
+ * cioè la maggior parte dei visitatori) oppure se il sistema chiede meno
+ * animazioni. In entrambi i casi il sito resta esattamente com'è, senza che
+ * venga eseguita una riga di questo codice.
+ */
+---
+
+<script>
+  const puntatoreFine = matchMedia('(pointer: fine)').matches
+  const motoRidotto = matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  if (puntatoreFine && !motoRidotto) {
+    document.documentElement.dataset.cursore = 'attivo'
+
+    // ── La luce che insegue il cursore ────────────────────────
+    const apertura = document.querySelector<HTMLElement>('.hero')
+
+    if (apertura) {
+      // Posizione mostrata e posizione voluta: la prima rincorre la seconda,
+      // così la luce arriva con un attimo di ritardo invece di essere
+      // incollata al puntatore. È la differenza fra "riflesso" e "adesivo".
+      let x = 50
+      let y = 40
+      let versoX = 50
+      let versoY = 40
+      let inCorso = false
+
+      const rincorri = () => {
+        x += (versoX - x) * 0.08
+        y += (versoY - y) * 0.08
+        apertura.style.setProperty('--luce-x', x.toFixed(2) + '%')
+        apertura.style.setProperty('--luce-y', y.toFixed(2) + '%')
+
+        if (Math.abs(versoX - x) > 0.1 || Math.abs(versoY - y) > 0.1) {
+          requestAnimationFrame(rincorri)
+        } else {
+          inCorso = false
+        }
+      }
+
+      const avvia = () => {
+        if (inCorso) return
+        inCorso = true
+        requestAnimationFrame(rincorri)
+      }
+
+      apertura.addEventListener(
+        'pointermove',
+        (evento) => {
+          const area = apertura.getBoundingClientRect()
+          versoX = ((evento.clientX - area.left) / area.width) * 100
+          versoY = ((evento.clientY - area.top) / area.height) * 100
+          avvia()
+        },
+        {passive: true},
+      )
+
+      // Uscendo, la luce torna piano al centro invece di sparire.
+      apertura.addEventListener('pointerleave', () => {
+        versoX = 50
+        versoY = 40
+        avvia()
+      })
+    }
+
+    // ── Le fotografie che si inclinano ────────────────────────
+    for (const cornice of document.querySelectorAll<HTMLElement>('[data-inclina]')) {
+      const foto = cornice.querySelector('img')
+      if (!foto) continue
+
+      cornice.addEventListener(
+        'pointermove',
+        (evento) => {
+          const area = cornice.getBoundingClientRect()
+          const scartoX = ((evento.clientX - area.left) / area.width - 0.5) * 2
+          const scartoY = ((evento.clientY - area.top) / area.height - 0.5) * 2
+          // Poco: dieci pixel. Di più sembra un gioco, non un oggetto.
+          foto.style.transform =
+            `scale(1.06) translate(${(-scartoX * 10).toFixed(1)}px, ${(-scartoY * 10).toFixed(1)}px)`
+        },
+        {passive: true},
+      )
+
+      cornice.addEventListener('pointerleave', () => {
+        foto.style.transform = ''
+      })
+    }
+  }
+</script>

@@ -348,11 +348,27 @@ ul { list-style: none; }
   overflow: hidden;
 }
 
+/* Il bagliore dell'apertura: fermo al centro finché non c'è un cursore,
+   poi lo insegue (le due variabili le scrive Movimento.astro). Su telefono
+   resta esattamente com'era. */
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,168,76,.07) 0%, transparent 70%);
+  background: radial-gradient(
+    ellipse 80% 60% at var(--luce-x, 50%) var(--luce-y, 40%),
+    rgba(201, 168, 76, 0.07) 0%,
+    transparent 70%
+  );
+}
+
+/* Con il cursore la luce è un po' più decisa: si nota che risponde. */
+:root[data-cursore] .hero::before {
+  background: radial-gradient(
+    ellipse 70% 55% at var(--luce-x, 50%) var(--luce-y, 40%),
+    rgba(201, 168, 76, 0.13) 0%,
+    transparent 68%
+  );
 }
 
 .hero::after {
@@ -495,6 +511,20 @@ ul { list-style: none; }
   border-color: rgba(201,168,76,.45);
   transform: translateY(-5px);
   box-shadow: 0 16px 40px rgba(0,0,0,.45);
+}
+
+/* L'inclinazione la applica Movimento.astro con una transform. La transizione
+   lunga e in uscita morbida fa sembrare che la foto abbia un peso, invece di
+   essere incollata al puntatore. */
+[data-inclina] img {
+  transition: transform 0.45s cubic-bezier(0.22, 0.8, 0.24, 1);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-inclina] img {
+    transition: none;
+  }
 }
 
 .knife-card-img {
@@ -1259,4 +1289,48 @@ ul { list-style: none; }
   .cf-row        { grid-template-columns: 1fr; }
   .process-grid  { grid-template-columns: 1fr; }
   .cf-submit     { width: 100%; text-align: center; }
+}
+
+/* ── COMPARSA ALLO SCORRIMENTO ───────────────────────────── */
+/* Il vecchio sito faceva salire le schede in dissolvenza con un
+   IntersectionObserver. Qui lo stesso effetto senza una riga di JavaScript,
+   con le animazioni legate allo scorrimento.
+
+   Tutto dentro @supports: dove il browser non le conosce (oggi Firefox) le
+   regole non si applicano affatto e il contenuto si vede normalmente. Nessun
+   elemento resta invisibile in attesa di qualcosa. */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .knife-card,
+    .process-step,
+    .bio-text,
+    .s-title,
+    .divider,
+    .canale {
+      animation: comparsa linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 28%;
+    }
+
+    /* Le schede del catalogo entrano leggermente sfalsate, come se le
+       stessi appoggiando sul banco una dopo l'altra. */
+    .knives-grid > *:nth-child(2n) {
+      animation-range: entry 5% cover 34%;
+    }
+    .knives-grid > *:nth-child(3n) {
+      animation-range: entry 5% cover 40%;
+    }
+  }
+}
+
+@keyframes comparsa {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
