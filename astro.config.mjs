@@ -28,8 +28,9 @@ export default defineConfig({
   ],
 
   build: {
-    // Un solo foglio di stile invece di tanti frammenti: su rete mobile
-    // conta più il numero di richieste della dimensione.
-    inlineStylesheets: 'auto',
+    // Fogli di stile sempre come file, mai incollati dentro l'HTML.
+    // Serve alla Content-Security-Policy: senza stili inline la policy può
+    // dire "style-src 'self'" senza aprire a 'unsafe-inline'.
+    inlineStylesheets: 'never',
   },
 })

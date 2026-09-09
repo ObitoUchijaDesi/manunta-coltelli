@@ -9,10 +9,11 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/genera-headers.mjs && node scripts/verifica-contenuti.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "anteprima": "node scripts/anteprima.mjs",
+    "prova-produzione": "node scripts/prova-produzione.mjs",
     "verifica-contenuti": "node scripts/verifica-contenuti.mjs",
     "prepara-migrazione": "node scripts/prepara-migrazione.mjs"
   },
