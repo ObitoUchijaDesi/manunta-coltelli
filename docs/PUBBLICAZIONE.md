@@ -45,6 +45,13 @@ Impostazioni del progetto:
 | Cartella di output | `dist` |
 | Versione di Node | `22` |
 | Branch di produzione | `main` |
+| Branch di anteprima | **Nessuno** (vedi sotto) |
+
+> **Importante: disattiva i deploy dei branch diversi da `main`.**
+> In Settings → Builds & deployments → *Preview deployments*, scegli "None".
+> Senza questa impostazione, il backup settimanale che scrive sul branch
+> `backup` farebbe partire un build inutile ogni lunedì — e quel branch non
+> contiene il sito, quindi il build fallirebbe ogni volta.
 
 Variabili d'ambiente (Settings → Environment variables):
 

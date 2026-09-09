@@ -25,24 +25,62 @@ L'export di Sanity scarica i file veri delle fotografie, non i soli riferimenti:
 
 Per i soli testi basta aprire il branch `backup` e prendere `contenuti/contenuti.ndjson`.
 
-## Come si ripristina
+## Come ripristinare Sanity da un backup
 
-**Testi e fotografie** (dall'archivio completo):
+Procedura completa, da seguire in ordine.
+
+### 1. Trova il backup giusto
+
+Decidi prima di cosa hai bisogno:
+
+- **hai perso anche le fotografie** → serve l'archivio completo, quindi un backup degli ultimi 90 giorni;
+- **hai perso solo testi** (qualcuno ha sovrascritto una descrizione) → basta il branch `backup`, che arriva indietro nel tempo quanto serve.
+
+### 2. Scaricalo
+
+Archivio completo: GitHub → **Actions** → **Backup dei contenuti** → l'esecuzione riuscita più recente → sezione **Artifacts** in fondo → `contenuti-completi-…`. Arriva come `.zip` che contiene il `.tar.gz`.
+
+Solo testi: GitHub → menu dei branch → `backup` → `contenuti/contenuti.ndjson` → **Raw** → salva.
+
+### 3. Prepara i file
 
 ```bash
+unzip contenuti-completi-*.zip
 tar -xzf contenuti-completi.tar.gz
-cd studio
-npx sanity dataset import ../<cartella-estratta>/data.ndjson production --replace
 ```
 
-**Solo i testi** (dal branch `backup`):
+Dentro trovi `data.ndjson` (i documenti) e una cartella `images/` con i file veri delle fotografie.
+
+### 4. Importa
 
 ```bash
 cd studio
-npx sanity dataset import ../contenuti.ndjson production --replace
+npx sanity login
+npx sanity dataset import ../data.ndjson production --replace
 ```
 
-`--replace` sovrascrive i documenti con lo stesso identificativo. Senza, l'import si ferma sui duplicati.
+`--replace` sovrascrive i documenti che hanno lo stesso identificativo. Senza, l'import si ferma appena ne trova uno già presente.
+
+### 5. Cosa succede alle fotografie
+
+Questo è il punto che si sbaglia più spesso.
+
+- **Importando dall'archivio completo**, la CLI carica anche i file delle immagini e ricollega i riferimenti: le fotografie tornano davvero.
+- **Importando dal solo `contenuti.ndjson` del branch `backup`**, le immagini **non** vengono ricreate. Quel file contiene i testi e i riferimenti alle immagini: se le immagini esistono ancora su Sanity i riferimenti si riagganciano, se sono state cancellate i coltelli restano senza foto.
+
+Detto altrimenti: il branch `backup` serve a recuperare un testo, non a ricostruire il catalogo da zero.
+
+### 6. Verifica che sia andata
+
+1. Apri il pannello: i coltelli ci sono, con le loro fotografie.
+2. Controlla un coltello a caso: nome, descrizione, materiali, disponibilità.
+3. Guarda quanti documenti sono stati importati — la CLI lo stampa a fine import — e confrontalo con quanti te ne aspettavi.
+4. Lancia un build: `npm run build`. Se passa il controllo dei segnaposto, i contenuti sono completi.
+5. Apri il sito ricostruito e controlla una pagina coltello.
+
+### 7. Se il ripristino peggiora la situazione
+
+L'import non tocca il sito pubblicato. Finché non parte un nuovo build, online resta la versione precedente: c'è tempo per rimediare senza fretta.
 
 ## Come si fa un backup a mano
 
