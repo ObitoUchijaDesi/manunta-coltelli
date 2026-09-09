@@ -51,6 +51,13 @@ for (const pagina of pagine) {
   for (const trovato of html.matchAll(/(?:src|href)="(https?:\/\/[^"]+)"/g)) {
     risorseEsterne.add(new URL(trovato[1]).origin)
   }
+
+  // La policy dice frame-src 'none': se comparisse un riquadro incorporato
+  // resterebbe bianco, ed è meglio saperlo adesso.
+  if (/<(iframe|embed|object)[\s>]/i.test(html)) {
+    console.error(`\nATTENZIONE: ${pagina} contiene un elemento incorporato, che la CSP blocca.`)
+    process.exit(1)
+  }
 }
 
 // ── Costruzione della policy ────────────────────────────────────
@@ -67,7 +74,11 @@ const csp = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
+  // Il sito non incorpora niente e non vuole essere incorporato.
+  "frame-src 'none'",
   "frame-ancestors 'none'",
+  // Nessun service worker: non ne esiste uno e non deve poterne comparire uno.
+  "worker-src 'none'",
   // Il sito non ha nessun modulo: nessuna destinazione di invio è lecita.
   "form-action 'none'",
   // Le fotografie in produzione arrivano dalla CDN di Sanity.
