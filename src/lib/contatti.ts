@@ -42,6 +42,21 @@ export function urlInstagram(impostazioni: ImpostazioniSito): string | null {
   return utente ? `https://instagram.com/${utente}` : null
 }
 
+/**
+ * Testi precompilati.
+ *
+ * Contengono solo il nome del coltello, mai dati di chi scrive: il messaggio
+ * finisce nell'indirizzo del link, e un indirizzo si può registrare nella
+ * cronologia del browser o nei log di chi sta in mezzo.
+ */
+export const messaggi = {
+  generico: 'Buongiorno Alessandro, vorrei informazioni sui suoi coltelli.',
+  perColtello: (nomeColtello: string) =>
+    `Buongiorno Alessandro, vorrei informazioni su ${nomeColtello}.`,
+  oggettoEmail: (nomeColtello?: string) =>
+    nomeColtello ? `Informazioni su ${nomeColtello}` : 'Richiesta di informazioni',
+}
+
 /** Vero se manca qualunque recapito: il sito non è pronto per la pubblicazione. */
 export function recapitiIncompleti(impostazioni: ImpostazioniSito): string[] {
   const mancanti: string[] = []

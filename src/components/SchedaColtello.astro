@@ -1,7 +1,7 @@
 ---
 import type {Coltello, ImpostazioniSito} from '../lib/tipi'
 import {ETICHETTE_DISPONIBILITA} from '../lib/tipi'
-import {urlWhatsApp} from '../lib/contatti'
+import {urlWhatsApp, messaggi} from '../lib/contatti'
 import FotoColtello from './FotoColtello.astro'
 import {LARGHEZZE_SCHEDA} from '../lib/immagini'
 
@@ -15,10 +15,7 @@ interface Props {
 const {coltello, impostazioni, prioritaria = false} = Astro.props
 
 const href = `/coltelli/${coltello.slug}/`
-const whatsapp = urlWhatsApp(
-  impostazioni,
-  `Ciao! Sono interessato al coltello "${coltello.nome}". Puoi darmi più informazioni?`,
-)
+const whatsapp = urlWhatsApp(impostazioni, messaggi.perColtello(coltello.nome))
 ---
 
 <article class="knife-card">

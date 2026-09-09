@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro'
 import SchedaColtello from '../components/SchedaColtello.astro'
 import {caricaColtelli, caricaImpostazioni} from '../lib/contenuti'
-import {urlWhatsApp} from '../lib/contatti'
+import {urlWhatsApp, messaggi} from '../lib/contatti'
 
 const impostazioni = await caricaImpostazioni()
 const coltelli = await caricaColtelli()
@@ -10,10 +10,7 @@ const coltelli = await caricaColtelli()
 // In home i primi sei: il catalogo completo ha la sua pagina.
 const inEvidenza = coltelli.slice(0, 6)
 
-const whatsapp = urlWhatsApp(
-  impostazioni,
-  'Ciao Alessandro! Ho visto il tuo sito e vorrei parlare di un progetto.',
-)
+const whatsapp = urlWhatsApp(impostazioni, messaggi.generico)
 
 const descrizione =
   impostazioni.presentazioneBreve?.slice(0, 155) ||
@@ -139,7 +136,7 @@ if (impostazioni.instagram) {
     <section class="section cta-section" aria-labelledby="titolo-contatto">
       <div class="container cta-inner">
         <div class="divider"><span aria-hidden="true">✦</span></div>
-        <h2 class="s-title" id="titolo-contatto" style="margin-bottom:.75rem">
+        <h2 class="s-title titolo-cta" id="titolo-contatto">
           Hai un progetto<br /><em class="cta-em">in mente?</em>
         </h2>
         {impostazioni.invitoContatto && <p class="cta-testo">{impostazioni.invitoContatto}</p>}
@@ -168,6 +165,10 @@ if (impostazioni.instagram) {
   .vedi-tutti {
     margin-top: 3rem;
     text-align: center;
+  }
+
+  .titolo-cta {
+    margin-bottom: 0.75rem;
   }
 
   .cta-em {

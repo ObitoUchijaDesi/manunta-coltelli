@@ -1,34 +1,40 @@
 ---
 import Base from '../layouts/Base.astro'
 import {caricaImpostazioni} from '../lib/contenuti'
-import {urlWhatsApp, urlEmail, urlInstagram, utenteInstagram} from '../lib/contatti'
+import {urlWhatsApp, urlEmail, urlInstagram, utenteInstagram, messaggi} from '../lib/contatti'
+
+/**
+ * Nessun modulo di contatto, per scelta.
+ *
+ * Un form richiederebbe un servizio esterno che riceve gli invii: un altro
+ * account da intestare al proprietario, un'altra cosa che può smettere di
+ * funzionare senza che nessuno se ne accorga, e dati di visitatori conservati
+ * da qualche parte. Per far partire una conversazione bastano WhatsApp e una
+ * email, che Alessandro ha già e che continueranno a funzionare da sole.
+ *
+ * L'indirizzo email è anche scritto in chiaro sotto il pulsante: chi usa la
+ * posta dal browser e non ha un programma configurato può copiarlo, invece di
+ * cliccare un link che non apre niente.
+ */
 
 const impostazioni = await caricaImpostazioni()
 
-const whatsapp = urlWhatsApp(
-  impostazioni,
-  'Ciao Alessandro! Ho visto il tuo sito e vorrei parlare di un progetto.',
-)
-const email = urlEmail(impostazioni)
+const whatsapp = urlWhatsApp(impostazioni, messaggi.generico)
+const email = urlEmail(impostazioni, messaggi.oggettoEmail())
 const instagram = urlInstagram(impostazioni)
+const nomeInstagram = utenteInstagram(impostazioni)
 
-const recapiti = [
-  {href: whatsapp, etichetta: 'WhatsApp', valore: impostazioni.whatsapp, esterno: true},
-  {href: email, etichetta: 'Email', valore: impostazioni.email, esterno: false},
-  {href: instagram, etichetta: 'Instagram', valore: `@${utenteInstagram(impostazioni) ?? ''}`, esterno: true},
-].filter((r): r is {href: string; etichetta: string; valore: string; esterno: boolean} =>
-  Boolean(r.href),
-)
+const nessunRecapito = !whatsapp && !email && !instagram
 ---
 
 <Base
   titolo="Contatti"
-  descrizione={`Contatta ${impostazioni.nomeArtigiano} per richiedere un coltello artigianale su misura.`}
+  descrizione={`Contatta ${impostazioni.nomeArtigiano} per informazioni sui coltelli artigianali o per commissionarne uno su misura.`}
   impostazioni={impostazioni}
 >
   <main id="contenuto-principale">
     <section class="contacts-wrap" aria-labelledby="titolo-contatti">
-      <div class="divider" style="margin-top:1rem"><span aria-hidden="true">✦</span></div>
+      <div class="divider divider-alto"><span aria-hidden="true">✦</span></div>
       <p class="s-label">Contatti</p>
       <h1 class="s-title" id="titolo-contatti">Parliamo di<br />un progetto</h1>
 
@@ -40,22 +46,42 @@ const recapiti = [
       </p>
 
       {
-        recapiti.length === 0 ? (
+        nessunRecapito ? (
           <p class="contatti-mancanti">
             I recapiti non sono ancora stati inseriti nel pannello di gestione.
           </p>
         ) : (
-          <div class="contacts-grid">
-            {recapiti.map((r) => (
-              <a
-                href={r.href}
-                class="c-card"
-                {...(r.esterno ? {target: '_blank', rel: 'noopener noreferrer'} : {})}
-              >
-                <span class="c-label">{r.etichetta}</span>
-                <span class="c-val">{r.valore}</span>
-              </a>
-            ))}
+          <div class="canali">
+            {whatsapp && (
+              <div class="canale canale-primario">
+                <h2 class="canale-titolo">WhatsApp</h2>
+                <p class="canale-nota">Il modo più veloce. Rispondo appena posso.</p>
+                <a href={whatsapp} target="_blank" rel="noopener noreferrer" class="btn-gold canale-azione">
+                  Scrivi su WhatsApp
+                </a>
+              </div>
+            )}
+
+            {email && (
+              <div class="canale">
+                <h2 class="canale-titolo">Email</h2>
+                <p class="canale-nota">Se preferisci scrivere con calma, o non usi WhatsApp.</p>
+                <a href={email} class="btn-ghost canale-azione">Scrivi una email</a>
+                <p class="canale-indirizzo">
+                  oppure copia l’indirizzo: <span class="indirizzo">{impostazioni.email}</span>
+                </p>
+              </div>
+            )}
+
+            {instagram && (
+              <div class="canale">
+                <h2 class="canale-titolo">Instagram</h2>
+                <p class="canale-nota">Le lavorazioni in corso, giorno per giorno.</p>
+                <a href={instagram} target="_blank" rel="noopener noreferrer" class="btn-ghost canale-azione">
+                  @{nomeInstagram}
+                </a>
+              </div>
+            )}
           </div>
         )
       }
@@ -67,23 +93,83 @@ const recapiti = [
           </p>
         )
       }
+
+      <p class="contatti-privacy">
+        Quello che scrivi arriva direttamente ad Alessandro tramite WhatsApp, email o Instagram:
+        questo sito non raccoglie né conserva nulla. <a href="/privacy/">Come trattiamo i dati</a>.
+      </p>
     </section>
   </main>
 </Base>
 
 <style>
+  .divider-alto {
+    margin-top: 1rem;
+  }
+
   .contatti-intro {
     color: var(--muted);
-    max-width: 500px;
-    margin-bottom: 2.5rem;
+    max-width: 55ch;
+    margin-bottom: 3rem;
     font-size: 0.95rem;
     line-height: 1.75;
   }
-  .contatti-mancanti {
-    color: var(--muted);
-    border: 1px solid var(--border2);
-    padding: 1.25rem;
+
+  .canali {
+    display: grid;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
   }
+
+  .canale {
+    background: var(--bg);
+    padding: 1.75rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .canale-primario {
+    background: var(--bg2);
+  }
+
+  .canale-titolo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .canale-nota {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin: 0;
+    max-width: 42ch;
+  }
+
+  .canale-azione {
+    margin-top: 0.75rem;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .canale-indirizzo {
+    margin: 0.75rem 0 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .indirizzo {
+    color: var(--text);
+    /* Selezionabile con un tocco prolungato sul telefono. */
+    user-select: all;
+    word-break: break-all;
+  }
+
   .contatti-luogo {
     margin-top: 2.5rem;
     color: var(--muted);
@@ -93,8 +179,25 @@ const recapiti = [
     color: var(--text);
     font-weight: 400;
   }
-  /* Bersaglio comodo da dito su tutta la scheda del recapito. */
-  .c-card {
-    min-height: 88px;
+
+  .contatti-mancanti {
+    color: var(--muted);
+    border: 1px solid var(--border2);
+    padding: 1.25rem;
+  }
+
+  .contatti-privacy {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+    max-width: 60ch;
+  }
+
+  @media (min-width: 760px) {
+    .canali {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
   }
 </style>

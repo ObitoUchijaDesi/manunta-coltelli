@@ -1,6 +1,6 @@
 ---
 import type {ImpostazioniSito} from '../lib/tipi'
-import {urlWhatsApp} from '../lib/contatti'
+import {urlWhatsApp, messaggi} from '../lib/contatti'
 
 interface Props {
   impostazioni: ImpostazioniSito
@@ -8,10 +8,7 @@ interface Props {
 
 const {impostazioni} = Astro.props
 
-const href = urlWhatsApp(
-  impostazioni,
-  'Ciao! Ho visto il tuo sito e sono interessato ai tuoi coltelli. Puoi darmi informazioni?',
-)
+const href = urlWhatsApp(impostazioni, messaggi.generico)
 ---
 
 {

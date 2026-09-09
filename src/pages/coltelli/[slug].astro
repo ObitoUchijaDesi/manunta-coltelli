@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro'
 import GalleriaColtello from '../../components/GalleriaColtello.astro'
 import {caricaColtelli, caricaImpostazioni} from '../../lib/contenuti'
 import {urlSocial} from '../../lib/immagini'
-import {urlWhatsApp, urlEmail} from '../../lib/contatti'
+import {urlWhatsApp, urlEmail, messaggi} from '../../lib/contatti'
 import {ETICHETTE_DISPONIBILITA, ETICHETTE_CATEGORIA} from '../../lib/tipi'
 import type {Coltello, ImpostazioniSito} from '../../lib/tipi'
 
@@ -32,11 +32,8 @@ interface Props {
 
 const {coltello, impostazioni, coltelli} = Astro.props
 
-const whatsapp = urlWhatsApp(
-  impostazioni,
-  `Ciao Alessandro, sono interessato al coltello "${coltello.nome}". Potresti darmi maggiori informazioni?`,
-)
-const email = urlEmail(impostazioni, `Informazioni su "${coltello.nome}"`)
+const whatsapp = urlWhatsApp(impostazioni, messaggi.perColtello(coltello.nome))
+const email = urlEmail(impostazioni, messaggi.oggettoEmail(coltello.nome))
 
 const descrizione =
   coltello.descrizioneBreve?.trim() ||
