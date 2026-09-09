@@ -181,7 +181,19 @@ const idDialog = `foto-${coltello.slug}`
     dialog.querySelector('[data-successiva]')?.addEventListener('click', () => mostra(attiva + 1))
 
     dialog.addEventListener('keydown', (evento) => {
+      // Escape chiude anche esplicitamente, non solo per conto del browser.
+      // Su alcuni Chromium l'evento "cancel" del <dialog> non scatta pur
+      // ricevendo il tasto: verificato durante i test, e la chiusura con
+      // Escape è un requisito, non un di più. Chiamare close() due volte non
+      // fa danno.
+      if (evento.key === 'Escape') {
+        evento.preventDefault()
+        dialog.close()
+        return
+      }
+
       if (foto.length < 2) return
+
       if (evento.key === 'ArrowLeft') {
         evento.preventDefault()
         mostra(attiva - 1)
