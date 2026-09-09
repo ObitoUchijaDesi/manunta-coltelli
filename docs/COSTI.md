@@ -63,7 +63,9 @@ Se il repository fosse pubblico, i minuti di Actions sono illimitati.
 
 ### Statistiche — OPZIONALE
 
-Cloudflare Web Analytics è incluso nell'account Cloudflare, senza costo aggiuntivo. Attualmente **non attivo**.
+Cloudflare Web Analytics è incluso nell'account Cloudflare, senza costo aggiuntivo. Attualmente **non attivo**: manca solo il token, che richiede l'account di Alessandro.
+
+La verifica privacy è conclusa: non usa cookie né altro stato lato client e non profila i visitatori, quindi accenderlo non comporta l'aggiunta di un banner del consenso.
 
 ### Email professionale — OPZIONALE, non usata
 

@@ -13,6 +13,19 @@ E basta. Due domini, di cui uno è il sito.
 
 Se le statistiche vengono accese si aggiunge `static.cloudflareinsights.com` (script) e `cloudflareinsights.com` (invio dei dati). Oggi sono spente.
 
+### Statistiche: verifica conclusa
+
+Cloudflare dichiara nella propria documentazione che Web Analytics **non usa alcuno stato lato client** — né cookie né localStorage — e **non costruisce impronte digitali** dei visitatori a partire da indirizzo IP, user agent o altri dati. Le visite non vengono contate su identificativi univoci ma sugli eventi di navigazione; le metriche sulle prestazioni arrivano dalla Performance API del browser.
+
+Conclusione tecnica: **si può attivare senza introdurre il banner del consenso.** Resta spento solo perché serve l'account Cloudflare di Alessandro per generare il token.
+
+Quando verrà acceso, due cose vanno fatte insieme:
+
+1. aggiungere `CLOUDFLARE_ANALYTICS_TOKEN` fra le variabili di Cloudflare Pages;
+2. aggiungere alla pagina privacy una riga che dica che il sito misura le visite in forma aggregata, senza cookie e senza identificare le persone.
+
+La valutazione legale finale resta di un professionista: qui c'è solo il comportamento tecnico verificato.
+
 ## Su click — solo se il visitatore decide di uscire
 
 | Dominio | Da dove | Cosa succede |

@@ -11,10 +11,15 @@
  * usare cookie né identificatori persistenti — che è la condizione per non
  * dover mettere un banner di consenso.
  *
- * PENDING: prima di accenderlo va verificato sulla documentazione corrente di
- * Cloudflare che il beacon non usi cookie o storage locale e quali dati
- * raccolga. Se dovesse usarli, la scelta va rifatta: senza quella verifica
- * l'assenza del banner non è difendibile.
+ * VERIFICATO (settembre 2026, documentazione e blog Cloudflare): il beacon non
+ * usa alcuno stato lato client — né cookie né localStorage — e non costruisce
+ * impronte digitali a partire da indirizzo IP, user agent o altro. Le visite
+ * sono contate dagli eventi di navigazione, non da identificativi univoci, e i
+ * dati sulle prestazioni arrivano dalla Performance API del browser.
+ *
+ * Conseguenza pratica: si può accendere senza dover aggiungere il banner del
+ * consenso. Resta spento finché non esiste l'account Cloudflare di Alessandro
+ * e, quando verrà acceso, la pagina privacy va aggiornata di conseguenza.
  */
 
 const token =
