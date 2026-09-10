@@ -91,10 +91,11 @@ if (impostazioni.instagram) {
     }
 
     <!-- ── UN COLTELLO GRANDE QUANTO LO SCHERMO ── -->
-    {/* Il primo coltello dell'ordine scelto da Alessandro. Se il catalogo e'
-        vuoto la sezione non esiste: nessun riquadro grigio, nessun testo che
-        parla di qualcosa che non c'e'. */}
-    {inEvidenza.length > 0 && <VetrinaGrande coltello={inEvidenza[0]} />}
+    {/* I primi coltelli secondo l'ordine scelto da Alessandro. Due e non tre:
+        ogni blocco occupa quasi tutto lo schermo, e con tre la home diventa
+        una salita prima di arrivare al catalogo. Per cambiarne il numero
+        basta questa riga. */}
+    {inEvidenza.length > 0 && <VetrinaGrande coltelli={inEvidenza.slice(0, 2)} />}
 
     <!-- ── CATALOGO IN EVIDENZA ── -->
     <section class="section" id="coltelli" aria-labelledby="titolo-coltelli">
