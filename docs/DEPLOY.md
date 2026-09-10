@@ -45,13 +45,31 @@ Impostazioni del progetto:
 | Cartella di output | `dist` |
 | Versione di Node | `22` |
 | Branch di produzione | `main` |
-| Branch di anteprima | **Nessuno** (vedi sotto) |
+| Branch di anteprima | tutti **tranne** `backup` (vedi sotto) |
 
-> **Importante: disattiva i deploy dei branch diversi da `main`.**
-> In Settings → Builds & deployments → *Preview deployments*, scegli "None".
-> Senza questa impostazione, il backup settimanale che scrive sul branch
-> `backup` farebbe partire un build inutile ogni lunedì — e quel branch non
-> contiene il sito, quindi il build fallirebbe ogni volta.
+## I branch
+
+| Branch | A cosa serve | Dove finisce |
+|---|---|---|
+| `main` | Il sito vero | Il dominio pubblico |
+| `develop` | Lavori in corso | Indirizzo di anteprima Cloudflare |
+| `UAT` | Verifica prima di andare in produzione | Indirizzo di anteprima Cloudflare |
+| `backup` | Solo copie dei contenuti, **non** contiene il sito | Nessun deploy |
+
+Il giro: si lavora su `develop`, quando regge si porta su `UAT` per un controllo, poi su `main` che pubblica.
+
+> **Cosa i branch NON separano: i contenuti.**
+> Esiste un solo dataset Sanity, quindi `develop`, `UAT` e `main` mostrano
+> tutti gli stessi coltelli. I branch servono a provare modifiche al
+> **codice** senza toccare il sito pubblico; per provare i contenuti c'è la
+> pubblicazione in Sanity, che è già reversibile da sola.
+
+> **Importante: escludi `backup` dalle anteprime.**
+> In Settings → Builds & deployments → *Preview deployments* → *Configure
+> preview deployments* → scegli **Custom branches** e metti `backup` fra i
+> branch **esclusi**. Senza questo, il backup settimanale farebbe partire ogni
+> lunedì un build destinato a fallire: su quel branch non c'è il sito, solo i
+> contenuti esportati.
 
 ## Variabili d'ambiente
 

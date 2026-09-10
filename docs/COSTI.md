@@ -57,9 +57,9 @@ Le richieste ai file statici sono **gratuite e illimitate**: il sito è fatto so
 
 Repository e GitHub Actions sono gratuiti nei limiti del piano Free.
 
-`DA VERIFICARE AL MOMENTO DELL'ATTIVAZIONE` — minuti di Actions inclusi. Il backup gira **una volta a settimana** e dura pochi minuti: circa 10–15 minuti al mese, ben dentro qualsiasi soglia.
+Verificato sulla documentazione GitHub: i minuti di Actions sono **gratuiti e illimitati per i repository pubblici**. Il repository di questo progetto è pubblico, quindi il backup non consuma nulla.
 
-Se il repository fosse pubblico, i minuti di Actions sono illimitati.
+Se un domani venisse reso privato, il piano gratuito include 2.000 minuti al mese: il backup gira una volta a settimana e ne usa circa 10–15, quindi resterebbe comunque dentro.
 
 ### Statistiche — OPZIONALE
 
