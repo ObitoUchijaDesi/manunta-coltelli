@@ -1,7 +1,6 @@
 ---
 import Base from '../layouts/Base.astro'
 import SchedaColtello from '../components/SchedaColtello.astro'
-import PezzoInEvidenza from '../components/PezzoInEvidenza.astro'
 import {caricaColtelli, caricaImpostazioni} from '../lib/contenuti'
 import {urlWhatsApp, urlInstagram, urlFacebook, messaggi} from '../lib/contatti'
 
@@ -96,12 +95,6 @@ if (profili.length > 0) {
       )
     }
 
-    <!-- ── COM'È FATTO UN COLTELLO ── -->
-    {/* Uno solo, il primo secondo l'ordine scelto da Alessandro nel pannello.
-        Uno e non due: due blocchi uguali ripetevano il catalogo che sta poche
-        centinaia di pixel sotto. */}
-    {inEvidenza.length > 0 && <PezzoInEvidenza coltello={inEvidenza[0]} />}
-
     <!-- ── CATALOGO IN EVIDENZA ── -->
     <section class="section" id="coltelli" aria-labelledby="titolo-coltelli">
       <div class="container">
@@ -120,6 +113,7 @@ if (profili.length > 0) {
                     coltello={coltello}
                     impostazioni={impostazioni}
                     prioritaria={i < 2}
+                    larga={i === 0}
                   />
                 ))}
               </div>

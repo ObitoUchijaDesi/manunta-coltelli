@@ -10,15 +10,27 @@ interface Props {
   impostazioni: ImpostazioniSito
   /** Vero per le prime schede: la loro foto non va rimandata. */
   prioritaria?: boolean
+  /**
+   * La prima scheda del catalogo, larga tutta la griglia e disposta in
+   * orizzontale. Serve al ritmo: una griglia di riquadri uguali e' un
+   * catalogo a stampa, e il primo coltello merita di essere guardato prima
+   * di essere confrontato.
+   *
+   * L'altezza la decide il contenuto. Una versione precedente di questa idea
+   * era una sezione a parte con un'altezza minima scelta a mano: tre righe di
+   * caratteristiche non la riempivano e restava un buco con un pulsante
+   * dentro. Qui non c'e' nessuno spazio da riempire.
+   */
+  larga?: boolean
 }
 
-const {coltello, impostazioni, prioritaria = false} = Astro.props
+const {coltello, impostazioni, prioritaria = false, larga = false} = Astro.props
 
 const href = `/coltelli/${coltello.slug}/`
 const whatsapp = urlWhatsApp(impostazioni, messaggi.perColtello(coltello, Astro.site))
 ---
 
-<article class="knife-card">
+<article class:list={['knife-card', {'knife-card-larga': larga}]}>
   {coltello.pezzoUnico && <span class="knife-badge">Pezzo unico</span>}
 
   <span
@@ -208,6 +220,18 @@ const whatsapp = urlWhatsApp(impostazioni, messaggi.perColtello(coltello, Astro.
     .knife-wa-pallino,
     .knife-wa-testo {
       transition: none;
+    }
+  }
+
+  /* Sulla scheda larga la fotografia e' alta quanto tutta la scheda, quindi
+     un pallino che sporge di 22px sotto il bordo della foto finisce FUORI
+     dalla scheda e il clip-path lo taglia via: il pulsante spariva del tutto.
+     Misurato, non visto a occhio — sporgeva di 21px oltre il bordo.
+     Qui sta dentro la fotografia, in basso a destra. */
+  @media (min-width: 820px) {
+    .knife-card-larga .knife-wa-pallino {
+      bottom: 1.25rem;
+      right: 1.25rem;
     }
   }
 </style>
