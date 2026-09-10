@@ -48,9 +48,22 @@ export function urlEmail(
   return stringa ? `mailto:${email}?${stringa}` : `mailto:${email}`
 }
 
+/**
+ * Nome utente Instagram, solo se è plausibile.
+ *
+ * Non basta che il campo non sia vuoto: durante le prove ci è finito dentro
+ * un singolo punto, e il sito ci ha costruito sopra "instagram.com/." — un
+ * pulsante che non porta da nessuna parte. Instagram ammette lettere, cifre,
+ * punti e trattini bassi, ma un nome fatto di soli punti non esiste: qui
+ * pretendiamo almeno due caratteri e almeno una lettera o cifra.
+ */
 export function utenteInstagram(impostazioni: ImpostazioniSito): string | null {
   const grezzo = impostazioni.instagram?.trim().replace(/^@/, '')
-  return grezzo ? grezzo : null
+  if (!grezzo) return null
+  if (grezzo.length < 2) return null
+  if (!/^[A-Za-z0-9._]+$/.test(grezzo)) return null
+  if (!/[A-Za-z0-9]/.test(grezzo)) return null
+  return grezzo
 }
 
 export function urlInstagram(impostazioni: ImpostazioniSito): string | null {
