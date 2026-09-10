@@ -1,0 +1,88 @@
+---
+/**
+ * Prepara la fotografia che deve "volare" fra il catalogo e il dettaglio.
+ *
+ * Le transizioni fra pagine le fa il browser da sé, dichiarate in CSS con
+ * @view-transition: non serve JavaScript per la dissolvenza. Serve però dirgli
+ * QUALE fotografia del catalogo corrisponde a quella grande della pagina del
+ * coltello, e questo dipende da dove sta cliccando il visitatore. È l'unica
+ * cosa che il CSS da solo non può sapere.
+ *
+ * Il nome condiviso si assegna con un attributo, e il valore vero sta nel
+ * foglio di stile: qui si decide solo su quale elemento metterlo.
+ *
+ * Se il browser non conosce le transizioni fra documenti (oggi Firefox) o se
+ * il sistema chiede meno animazioni, questo codice non fa nulla e la
+ * navigazione resta quella normale. Niente si rompe: si perde un effetto.
+ */
+---
+
+<script>
+  const motoRidotto = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const browserPronto = 'startViewTransition' in document
+
+  // Sulle pagine di dettaglio la foto grande porta già il nome condiviso dal
+  // CSS. Se qui segnassimo anche una scheda dei "altri coltelli", due elementi
+  // avrebbero lo stesso nome e il browser annullerebbe l'intera transizione.
+  const paginaDiDettaglio = Boolean(document.querySelector('.galleria-immagine'))
+
+  if (browserPronto && !motoRidotto && !paginaDiDettaglio) {
+    const segna = (link: Element) => {
+      const foto = link.closest('.knife-card')?.querySelector('.knife-card-img')
+      if (!foto) return
+
+      // Uno alla volta: due elementi con lo stesso nome annullano tutto.
+      for (const vecchia of document.querySelectorAll('[data-morph]')) {
+        vecchia.removeAttribute('data-morph')
+      }
+
+      foto.setAttribute('data-morph', '')
+    }
+
+    const linkDelColtello = (bersaglio: EventTarget | null) => {
+      if (!(bersaglio instanceof Element)) return null
+      // Solo i collegamenti interni alle pagine dei coltelli: il pallino
+      // WhatsApp è un <a> anche lui, ma porta fuori dal sito.
+      return bersaglio.closest('.knife-card a[href^="/coltelli/"]')
+    }
+
+    // ── Andata ────────────────────────────────────────────────
+    // pointerdown e non click: il segno è pronto prima che la navigazione
+    // parta, anche quando il dito resta giù un attimo.
+    document.addEventListener(
+      'pointerdown',
+      (evento) => {
+        const link = linkDelColtello(evento.target)
+        if (link) segna(link)
+      },
+      {passive: true},
+    )
+
+    // La tastiera non genera pointerdown: chi naviga con Tab e Invio deve
+    // vedere lo stesso effetto.
+    document.addEventListener('keydown', (evento) => {
+      if (evento.key !== 'Enter') return
+      const link = linkDelColtello(document.activeElement)
+      if (link) segna(link)
+    })
+
+    // ── Ritorno ───────────────────────────────────────────────
+    // Tornando indietro dal dettaglio, la foto grande deve rientrare nella
+    // scheda giusta. Da dove si arriva lo dice il referrer: nessun dato da
+    // conservare, né cookie né archiviazione nel browser.
+    if (document.referrer) {
+      try {
+        const percorsoDiProvenienza = new URL(document.referrer, location.href).pathname
+        for (const link of document.querySelectorAll('.knife-card a[href^="/coltelli/"]')) {
+          if ((link as HTMLAnchorElement).pathname === percorsoDiProvenienza) {
+            segna(link)
+            break
+          }
+        }
+      } catch {
+        // Un referrer illeggibile non è un problema da segnalare a nessuno:
+        // si perde il volo della fotografia, non la navigazione.
+      }
+    }
+  }
+</script>

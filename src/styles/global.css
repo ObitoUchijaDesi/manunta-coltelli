@@ -72,16 +72,6 @@ ul { list-style: none; }
 ::-webkit-scrollbar-thumb { background: var(--border2); }
 ::-webkit-scrollbar-thumb:hover { background: var(--gold-dark); }
 
-/* ── PAGE FADE-IN ───────────────────────────────────────── */
-.page-enter {
-  animation: pageFade .35s ease both;
-}
-
-@keyframes pageFade {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
 /* ── NAVBAR ─────────────────────────────────────────────── */
 .navbar {
   position: fixed;
@@ -1294,7 +1284,15 @@ ul { list-style: none; }
     .s-title,
     .divider,
     .canale {
-      animation: comparsa linear both;
+      /* Scritte per esteso e non con la scorciatoia "animation". Il
+         minificatore compattava le due righe in
+         "animation: comparsa linear both view()", e animation-timeline non e'
+         ammesso dentro quella scorciatoia: i browser scartavano l'intera
+         dichiarazione e questo effetto non si vedeva. Trovato solo il
+         10/09/2026, misurando animationName nel browser. */
+      animation-name: comparsa;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
       animation-timeline: view();
       animation-range: entry 5% cover 28%;
     }
@@ -1318,5 +1316,113 @@ ul { list-style: none; }
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* ── TRANSIZIONI FRA LE PAGINE ───────────────────────────── */
+/* Il passaggio dal catalogo alla pagina di un coltello non è più uno stacco
+   secco: la pagina si fonde e la fotografia della scheda si allarga fino a
+   diventare quella grande del dettaglio.
+
+   Lo fa il browser, in due righe di CSS, su pagine HTML separate: nessun
+   framework, nessun router, nessun JavaScript che intercetta i clic. Il sito
+   resta un mucchio di file statici. Dove non è supportato (oggi Firefox) la
+   navigazione è quella di sempre — non c'è nulla che possa rimanere a metà. */
+
+@view-transition {
+  navigation: auto;
+}
+
+/* La fotografia che vola. Il nome è condiviso fra la foto grande del dettaglio
+   e la scheda su cui si è cliccato, che viene segnata da Transizioni.astro:
+   quando due elementi di due pagine diverse portano lo stesso nome, il browser
+   li tratta come lo stesso oggetto e lo anima da una posizione all'altra. */
+.galleria-immagine,
+[data-morph] {
+  view-transition-name: foto-coltello;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Un filo più rapida in uscita che in entrata: la pagina nuova non aspetta
+     che la vecchia sia finita di sparire, così il passaggio sembra svelto
+     anche se dura mezzo secondo. */
+  ::view-transition-old(root) {
+    animation-duration: 0.2s;
+  }
+
+  ::view-transition-new(root) {
+    animation-duration: 0.32s;
+  }
+
+  ::view-transition-group(foto-coltello) {
+    animation-duration: 0.44s;
+    /* Parte deciso e si posa piano, come un oggetto che ha un peso. */
+    animation-timing-function: cubic-bezier(0.2, 0.75, 0.15, 1);
+  }
+
+  /* Le due copie della fotografia hanno proporzioni diverse — 4:3 nella
+     scheda, libera nel dettaglio. Senza questo, durante il volo l'immagine si
+     stira. Con object-fit: cover il ritaglio cambia e la forma no. */
+  ::view-transition-old(foto-coltello),
+  ::view-transition-new(foto-coltello) {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    animation-duration: 0.44s;
+  }
+}
+
+/* ── L'APERTURA CHE CEDE IL PASSO ────────────────────────── */
+/* Scorrendo, il titolo grande si allontana e si smorza invece di scivolare
+   via rigido: l'attenzione passa al catalogo senza uno stacco.
+
+   Legato allo scorrimento, non a un timer: se ci si ferma a metà, l'effetto si
+   ferma a metà, e tornando su torna indietro. */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-inner {
+      animation-name: aperturaCede;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: exit 15% exit 95%;
+    }
+  }
+}
+
+@keyframes aperturaCede {
+  to {
+    opacity: 0.2;
+    transform: translateY(-30px) scale(0.985);
+  }
+}
+
+/* ── QUANTO MANCA ALLA FINE DELLA PAGINA ─────────────────── */
+/* Una riga d'oro sotto la barra in alto che avanza con lo scorrimento. Su una
+   pagina di dettaglio lunga dice, senza scrivere niente, quanto resta da
+   leggere. */
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .navbar::after {
+      content: '';
+      position: absolute;
+      inset: auto 0 -1px 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+      transform: scaleX(0);
+      transform-origin: 0 50%;
+      animation-name: avanzamentoPagina;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+@keyframes avanzamentoPagina {
+  to {
+    transform: scaleX(1);
   }
 }
