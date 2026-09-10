@@ -36,6 +36,7 @@ const pagine = tutteLePagine(DIST)
 const impronte = new Set()
 let inlineTrovati = 0
 const risorseEsterne = new Set()
+const collegamentiEsterni = new Set()
 
 for (const pagina of pagine) {
   const html = readFileSync(pagina, 'utf8')
@@ -47,9 +48,31 @@ for (const pagina of pagine) {
     impronte.add(createHash('sha256').update(trovato[1], 'utf8').digest('base64'))
   }
 
-  // Inventario di ciò che la pagina carica da fuori (src/href assoluti).
-  for (const trovato of html.matchAll(/(?:src|href)="(https?:\/\/[^"]+)"/g)) {
-    risorseEsterne.add(new URL(trovato[1]).origin)
+  // Inventario di ciò che la pagina SCARICA da fuori.
+  //
+  // Distinzione che conta, e che la prima versione di questo script
+  // sbagliava: un <img src> o un <link href> fanno partire una richiesta
+  // appena la pagina si apre, e la Content-Security-Policy li governa. Un
+  // <a href> verso wa.me o instagram.com è un collegamento su cui il
+  // visitatore clicca per uscire dal sito: non scarica niente e la policy non
+  // lo riguarda. Confonderli faceva fallire il build appena in Sanity sono
+  // comparsi i recapiti.
+  const elementiCheScaricano =
+    /<(?:script|link|img|source|iframe|embed|object|video|audio)\b[^>]*>/gi
+
+  for (const elemento of html.match(elementiCheScaricano) ?? []) {
+    for (const attributo of elemento.matchAll(/(?:src|href|srcset|data)="([^"]+)"/g)) {
+      // srcset elenca più indirizzi separati da virgola, ognuno con la larghezza
+      for (const pezzo of attributo[1].split(',')) {
+        const indirizzo = pezzo.trim().split(/\s+/)[0]
+        if (/^https?:\/\//.test(indirizzo)) risorseEsterne.add(new URL(indirizzo).origin)
+      }
+    }
+  }
+
+  // I collegamenti in uscita si annotano a parte: informazione utile, non un errore.
+  for (const collegamento of html.matchAll(/<a\b[^>]*href="(https?:\/\/[^"]+)"/g)) {
+    collegamentiEsterni.add(new URL(collegamento[1]).origin)
   }
 
   // La policy dice frame-src 'none': se comparisse un riquadro incorporato
@@ -126,7 +149,8 @@ console.log(`  pagine analizzate      ${pagine.length}`)
 console.log(`  script inline trovati  ${inlineTrovati} (${impronte.size} distinti)`)
 console.log(`  impronte nella CSP     ${impronte.size}`)
 console.log(`  statistiche            ${analiticheAttive ? 'attive (domini Cloudflare ammessi)' : 'spente'}`)
-console.log(`  origini esterne nelle pagine: ${[...risorseEsterne].join(', ') || 'nessuna'}`)
+console.log(`  richieste automatiche:  ${[...risorseEsterne].join(', ') || 'nessuna'}`)
+console.log(`  link in uscita (solo su click):  ${[...collegamentiEsterni].join(', ') || 'nessuno'}`)
 
 // Rete di sicurezza: se compare un dominio esterno che la CSP non prevede,
 // meglio accorgersene al build che scoprirlo dal sito rotto in produzione.
@@ -138,7 +162,9 @@ const ammessi = new Set([
 const inattesi = [...risorseEsterne].filter((o) => !ammessi.has(o))
 
 if (inattesi.length > 0) {
-  console.error(`\nATTENZIONE: origini esterne non previste dalla CSP: ${inattesi.join(', ')}`)
+  console.error(
+    `\nATTENZIONE: risorse scaricate da domini che la CSP non prevede: ${inattesi.join(', ')}`,
+  )
   console.error('Aggiornare genera-headers.mjs oppure togliere la risorsa.\n')
   process.exit(1)
 }
