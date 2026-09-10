@@ -1,0 +1,27 @@
+{
+  // Configurazione di Cloudflare per questo sito.
+  //
+  // Perché questo file esiste: senza, Wrangler rileva Astro e installa da solo
+  // l'adattatore Cloudflare a ogni build. Quell'adattatore trasforma un sito
+  // di file statici in un Worker, crea un KV per le sessioni e un binding
+  // Images che qui non servono, e sposta l'output da dist a dist/client —
+  // dove il nostro file _headers non arriva, quindi CSP, HSTS e Permissions
+  // Policy sparivano dalla produzione senza che nulla segnalasse l'errore.
+  //
+  // Dichiarando qui che il sito è solo file statici, Wrangler non tocca più
+  // niente: carica dist così com'è, _headers compreso.
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  // Deve combaciare con il nome del progetto su Cloudflare, non con quello
+  // del pacchetto npm.
+  "name": "manunta-coltelli",
+  "compatibility_date": "2026-09-10",
+
+  "assets": {
+    "directory": "./dist",
+
+    // Un indirizzo inesistente serve la nostra pagina 404 invece di un
+    // errore spoglio di Cloudflare.
+    "not_found_handling": "404-page"
+  }
+}
