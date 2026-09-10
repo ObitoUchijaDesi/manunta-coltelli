@@ -394,13 +394,36 @@ ul { list-style: none; }
   align-items: center;
   justify-content: center;
   gap: .8rem;
+  /* Sul telefono la scritta andava a capo e spezzava in due la riga d'oro,
+     che a quel punto restava appesa a metà della prima riga. La scritta sta
+     su una riga sola: quando lo spazio non basta, si stringe la spaziatura
+     invece di piegare. */
+  white-space: nowrap;
 }
 
 .hero-eyebrow::before, .hero-eyebrow::after {
   content: '';
-  width: 30px; height: 1px;
+  /* Le due lineette cedono spazio prima che ceda il testo: min-width a zero
+     perché per impostazione predefinita un elemento flex non si stringe sotto
+     la propria larghezza dichiarata. */
+  flex: 0 1 30px;
+  min-width: 0;
+  height: 1px;
   background: var(--gold);
   opacity: .5;
+}
+
+/* Schermi stretti: 20 caratteri a .4em di spaziatura non stanno in 320px
+   qualunque cosa si faccia con le lineette. Si stringe la spaziatura, che
+   resta comunque larga abbastanza da leggersi come un'etichetta. */
+@media (max-width: 420px) {
+  .hero-eyebrow {
+    font-size: .66rem;
+    letter-spacing: .22em;
+    gap: .6rem;
+  }
+
+  .hero-eyebrow::before, .hero-eyebrow::after { flex: 0 1 18px; }
 }
 
 .hero-h1 {
