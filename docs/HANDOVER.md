@@ -20,7 +20,25 @@ Dove lo sviluppatore serve, entra come **collaboratore invitato**, con un propri
 
 Una sola email per tutto, quella personale di Alessandro. Non serve un'email professionale per far funzionare il sito: se un domani ne vorrà una, si aggiunge senza toccare nulla.
 
-`ACTION REQUIRED — ALESSANDRO`: nessuno di questi account esiste ancora.
+## Stato al 10/09/2026
+
+Il sito è online su `https://alessandromanuntacoltelli.it` e **si aggiorna da solo**.
+
+Verificato dall'esterno quel giorno: Alessandro ha pubblicato un coltello dal telefono, Sanity ha chiamato il deploy hook, Cloudflare ha ricostruito il sito e le pagine sono comparse online. Nessun intervento dello sviluppatore in mezzo. È la prova che conta, più di qualunque elenco di spunte.
+
+| Pezzo | Stato |
+|---|---|
+| Dominio su Aruba, intestato ad Alessandro, rinnovo automatico | Fatto |
+| Nameserver su Cloudflare, zona attiva | Fatto |
+| HTTPS, `Always Use HTTPS`, `www` → dominio nudo con 301 | Fatto e verificato |
+| Header di sicurezza sulle risposte reali | Fatto e verificato |
+| Record antifalsificazione della posta (MX nullo, SPF, DMARC, DKIM) | Fatto e verificato |
+| Deploy hook Cloudflare ↔ webhook Sanity | Fatto e verificato |
+| 2FA sull'account Aruba di Alessandro | `DA FARE` |
+| Proprietà del repository GitHub ad Alessandro | `DA FARE` |
+| Proprietà del progetto Sanity ad Alessandro | `DA FARE` |
+
+Le tre righe finali sono l'unica cosa che separa il progetto dalla consegna completa. Nessuna delle tre serve per far funzionare il sito: servono perché non dipenda più da nessuno.
 
 ## Ordine in cui aprirli
 
@@ -77,11 +95,13 @@ Dipende da come si è registrato. Se ha usato "Continua con Google", si recupera
 **Cosa deve esistere**
 
 - Account di Alessandro con 2FA
-- Progetto Pages collegato al repository GitHub, branch di produzione `main`
-- Deploy dei branch diversi da `main` disattivati
-- Dominio aggiunto e HTTPS attivo
-- Variabili d'ambiente come da `docs/DEPLOY.md`
-- Deploy hook creato e incollato dentro Sanity
+- Worker `manunta-coltelli` (Workers Builds + Static Assets, **non** Pages) collegato al repository GitHub, branch di produzione `main`
+- I due domini aggiunti come **Custom domain** sul Worker, non come *Route*: le Route pretendono un record DNS che esista già e su un dominio nuovo non fanno nulla
+- Variabili: solo `NODE_VERSION`, `SANITY_PROJECT_ID`, `SANITY_DATASET`. `SITO_URL` **non** va impostata, vedi `docs/DEPLOY.md`
+- Deploy hook creato e incollato nel webhook di Sanity
+
+**Il deploy hook**
+Settings → Builds → *Deploy hooks*. È l'indirizzo che Sanity chiama quando Alessandro pubblica, ed è un segreto: chi lo ha può far partire build fino a esaurire i 500 mensili del piano gratuito. Non va nel repository, nei documenti, né in un campo visibile del CMS. Se finisce dove non deve, si cancella e se ne crea un altro: cambia solo l'indirizzo da incollare in Sanity, niente altro si rompe.
 
 **Aggiungere lo sviluppatore**
 Manage Account → Members → Invite. Ruolo minimo che gli serva.
