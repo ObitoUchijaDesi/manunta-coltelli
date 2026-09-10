@@ -74,7 +74,12 @@ const jsonLd = datiStrutturati
     <meta name="twitter:image" content={ogImage} />
 
     <meta name="theme-color" content="#0a0a0a" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {/* Il volto con le lame incrociate ritagliato dal logo: il logo intero a
+        16 pixel diventa una macchia, il testo circolare e la firma non si
+        leggono. Su fondo scuro così si stacca anche nelle linguette chiare. */}
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512" />
+    {/* Serve quando il sito viene aggiunto alla schermata home del telefono. */}
+    <link rel="apple-touch-icon" href="/favicon.png" />
 
     {/* Font ospitati da noi: nessuna connessione a Google, nessun indirizzo IP
         dei visitatori spedito a terzi, nessun consenso da chiedere.

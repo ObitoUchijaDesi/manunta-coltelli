@@ -68,12 +68,40 @@ await sharp({
   .jpeg({quality: 86, progressive: true})
   .toFile(SOCIAL)
 
+// ── Icona della linguetta del browser ───────────────────────────
+// Il logo intero a 16 pixel è una macchia: il testo circolare e la firma
+// diventano illeggibili. Si tiene la parte riconoscibile — il volto con le
+// lame incrociate — su fondo scuro, così si distingue anche nelle linguette
+// chiare.
+const FAVICON = join(RADICE, 'public', 'favicon.png')
+const LATO = 512
+
+const emblema = await sharp(DESTINAZIONE)
+  .extract({
+    left: Math.round(larghezza * 0.12),
+    top: Math.round(altezza * 0.22),
+    width: Math.round(larghezza * 0.76),
+    height: Math.round(altezza * 0.56),
+  })
+  .trim()
+  .resize({width: Math.round(LATO * 0.84), height: Math.round(LATO * 0.84), fit: 'inside'})
+  .toBuffer()
+
+await sharp({
+  create: {width: LATO, height: LATO, channels: 4, background: '#0a0a0a'},
+})
+  .composite([{input: emblema, gravity: 'center'}])
+  .png({compressionLevel: 9})
+  .toFile(FAVICON)
+
 const pesoLogo = statSync(DESTINAZIONE).size
 const pesoSocial = statSync(SOCIAL).size
+const pesoFavicon = statSync(FAVICON).size
 
 console.log('LOGO PREPARATO')
 console.log(`  origine      legacy/public/logo.png (nero su fondo bianco)`)
 console.log(`  destinazione public/logo.png (avorio su fondo trasparente)`)
 console.log(`  dimensioni   ${larghezza}x${altezza}px, ${Math.round(pesoLogo / 1024)} KB`)
 console.log(`  anteprima    public/social-default.jpg 1200x630, ${Math.round(pesoSocial / 1024)} KB`)
+console.log(`  icona        public/favicon.png ${LATO}x${LATO}, ${Math.round(pesoFavicon / 1024)} KB`)
 console.log('\nNiente più filtri CSS: se un giorno il logo cambia, basta sostituire il file.')
