@@ -1,4 +1,5 @@
-import type {ImpostazioniSito} from './tipi'
+import {ETICHETTE_CATEGORIA} from './tipi'
+import type {Coltello, ImpostazioniSito} from './tipi'
 
 /**
  * Costruzione dei link di contatto.
@@ -74,9 +75,11 @@ export function urlInstagram(impostazioni: ImpostazioniSito): string | null {
 /**
  * Testi precompilati.
  *
- * Contengono solo il nome del coltello, mai dati di chi scrive: il messaggio
- * finisce nell'indirizzo del link, e un indirizzo si può registrare nella
- * cronologia del browser o nei log di chi sta in mezzo.
+ * Descrivono il coltello e nulla di chi scrive. La distinzione conta: il
+ * messaggio finisce nell'indirizzo del link, e un indirizzo si può registrare
+ * nella cronologia del browser e nei log di chi sta in mezzo. Le misure di una
+ * lama lì dentro non fanno danno a nessuno; il nome o il telefono di un
+ * visitatore sì, ed è per questo che non ce li mettiamo mai.
  */
 export const messaggi = {
   /** Testo di WhatsApp dalle pagine che non parlano di un coltello preciso. */
@@ -88,9 +91,43 @@ export const messaggi = {
    * "al coltello X" e non "al X": i nomi cambiano genere — la Resolza è
    * femminile, il Cinghiale maschile — e anteporre "coltello" fa tornare la
    * frase con qualsiasi nome Alessandro inventi in futuro.
+   *
+   * Il messaggio porta con sé le caratteristiche del coltello e il suo
+   * indirizzo. Il motivo è pratico: prima diceva solo il nome, e con due
+   * coltelli chiamati allo stesso modo — cosa che Alessandro fa, stessa forma
+   * e materiali diversi — lui riceveva la richiesta senza sapere di quale si
+   * trattasse. Doveva chiedere, e chi scriveva doveva tornare a guardare.
+   *
+   * Compaiono solo i campi compilati: un coltello di cui si conosce soltanto
+   * il nome produce lo stesso messaggio breve di prima, non un elenco di
+   * righe vuote.
    */
-  perColtello: (nomeColtello: string) =>
-    `Ciao Alessandro, sono interessato al coltello ${nomeColtello}. Potresti darmi più informazioni?`,
+  perColtello: (coltello: Coltello, sito?: URL | string) => {
+    const dettagli: string[] = []
+
+    if (coltello.categoria) dettagli.push(`Tipo: ${ETICHETTE_CATEGORIA[coltello.categoria]}`)
+    if (coltello.materialeLama) dettagli.push(`Lama: ${coltello.materialeLama}`)
+    if (coltello.materialeManico) dettagli.push(`Manico: ${coltello.materialeManico}`)
+    if (coltello.altriMateriali) dettagli.push(`Altro: ${coltello.altriMateriali}`)
+    if (typeof coltello.lunghezzaTotale === 'number')
+      dettagli.push(`Lunghezza totale: ${coltello.lunghezzaTotale} cm`)
+    if (typeof coltello.lunghezzaLama === 'number')
+      dettagli.push(`Lunghezza lama: ${coltello.lunghezzaLama} cm`)
+    if (coltello.anno) dettagli.push(`Anno: ${coltello.anno}`)
+    if (coltello.pezzoUnico) dettagli.push('Pezzo unico')
+
+    // L'indirizzo della pagina è l'informazione che toglie ogni dubbio: la
+    // forma del percorso sta scritta qui una volta sola, così non si sfalsa
+    // rispetto alle pagine vere se un domani cambia.
+    const indirizzo = sito ? new URL(`/coltelli/${coltello.slug}/`, sito).href : null
+
+    const righe = [`Ciao Alessandro, sono interessato al coltello ${coltello.nome}.`]
+    if (dettagli.length > 0) righe.push('', ...dettagli)
+    if (indirizzo) righe.push('', indirizzo)
+    righe.push('', 'Potresti darmi più informazioni?')
+
+    return righe.join('\n')
+  },
 
   oggettoEmail: (nomeColtello?: string) =>
     nomeColtello
