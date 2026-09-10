@@ -79,9 +79,13 @@ Tre categorie, con regole diverse.
 
 | Nome | Scopo | Dove | Produzione | Preview |
 |---|---|---|---|---|
-| `SANITY_PROJECT_ID` | Dice al build da quale progetto leggere | Cloudflare Pages → Environment variables | Sì | Sì |
-| `SANITY_DATASET` | Quasi sempre `production` | Cloudflare Pages → Environment variables | Sì | Sì |
+| `SANITY_PROJECT_ID` | Dice al build da quale progetto leggere | `src/lib/sanity.ts` | **Non serve** | **Non serve** |
+| `SANITY_DATASET` | Quasi sempre `production` | `src/lib/sanity.ts` | **Non serve** | **Non serve** |
 | `SITO_URL` | Indirizzo definitivo senza barra finale. Costruisce canonical, sitemap e anteprime social: se è sbagliato, i link condivisi puntano nel posto sbagliato | Cloudflare → Environment variables | **Non serve** | **Non serve** |
+
+`SANITY_PROJECT_ID` e `SANITY_DATASET` stanno in `src/lib/sanity.ts`. **Non sono segreti**: il projectId si legge nell'indirizzo di ogni fotografia del sito e il dataset è pubblico in lettura. Le variabili d'ambiente continuano a funzionare e a vincere, per puntare a un altro progetto senza toccare il codice.
+
+Stavano solo fra le variabili di Cloudflare, valide per il branch di produzione: al primo build di un branch di prova non venivano trovate e il build si fermava dicendo «Sanity non è configurato» — un errore che parlava di credenziali quando mancava una configurazione.
 
 `SITO_URL` è **facoltativa e meglio non impostarla.** Il valore giusto — `https://alessandromanuntacoltelli.it` — è già scritto in `astro.config.mjs`, dove sta accanto al codice che lo usa e cambia insieme a lui.
 

@@ -94,12 +94,28 @@ if (!tuttoHtml.includes('La bottega è a')) {
 }
 
 // ── Identificativi di servizio ──────────────────────────────────
-const progetto = process.env.SANITY_PROJECT_ID ?? ''
+// Letto dal risultato, non dall'ambiente. Prima questo controllo pretendeva
+// la variabile SANITY_PROJECT_ID: da quando il projectId sta nel codice
+// (src/lib/sanity.ts) quella variabile non esiste più, e il controllo bloccava
+// build perfettamente riusciti. La prova che il progetto sia quello giusto è
+// che le fotografie del sito puntino davvero a un progetto Sanity.
+const progetti = new Set(
+  [...tuttoHtml.matchAll(/cdn\.sanity\.io\/images\/([a-z0-9]+)\//g)].map((trovato) => trovato[1]),
+)
+
 if (!anteprima) {
-  if (!progetto) {
-    bloccanti.push('SANITY_PROJECT_ID non impostato')
-  } else if (/^[xz]+$/i.test(progetto)) {
-    bloccanti.push(`SANITY_PROJECT_ID è un valore finto ("${progetto}")`)
+  for (const progetto of progetti) {
+    if (/^[xz]+$/i.test(progetto)) {
+      bloccanti.push(`le fotografie puntano a un progetto Sanity finto ("${progetto}")`)
+    }
+  }
+
+  // Due progetti diversi nello stesso sito vorrebbe dire che una parte delle
+  // pagine è stata costruita con una configurazione e una parte con un'altra.
+  if (progetti.size > 1) {
+    bloccanti.push(
+      `le fotografie puntano a ${progetti.size} progetti Sanity diversi: ${[...progetti].join(', ')}`,
+    )
   }
 }
 

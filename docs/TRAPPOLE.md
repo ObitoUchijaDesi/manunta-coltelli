@@ -51,6 +51,8 @@ Se risponde `"none"` mentre nel foglio di stile c'è un'animazione, è questo.
 
 **Regola** — un valore, un posto. `SITO_URL` su Cloudflare **non va impostata**: vedi `docs/DEPLOY.md`.
 
+**Ricaduta, lo stesso giorno** — `SANITY_PROJECT_ID` stava solo fra le variabili di Cloudflare, valide per il branch di produzione. Al primo build di un branch di prova non veniva trovata e il build si fermava con «Sanity non è configurato»: un messaggio che parlava di credenziali mancanti mentre mancava una configurazione, e che ha portato a cercare nel posto sbagliato. Ora sta in `src/lib/sanity.ts`, dove segue il branch. Non è un segreto: si legge nell'indirizzo di ogni fotografia del sito.
+
 Stessa famiglia di problema: `scripts/genera-headers.mjs` teneva il dominio in una lista scritta a mano, e al cambio ha dichiarato il sito stesso "dominio esterno" fermando il build. Ora lo ricava dal canonical delle pagine appena generate.
 
 ---
