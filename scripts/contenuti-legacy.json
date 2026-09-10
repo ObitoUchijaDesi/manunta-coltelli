@@ -71,7 +71,7 @@
   "impostazioniSito": {
     "nomeArtigiano": "Alessandro Manunta",
     "presentazioneBreve": "Artigiano coltelliero sardo. Ogni lama è un'opera d'arte forgiata con passione, tradizione e rispetto per la materia.",
-    "biografia": "Sono Alessandro Manunta, coltelliere artigiano con sede in Sardegna. Da oltre vent'anni creo coltelli unici, forgiando ogni lama con cura maniacale e rispetto per le tecniche tradizionali. Ogni pezzo che esce dalla mia bottega è frutto di ore di lavoro, passione e un profondo legame con la cultura e le tradizioni della mia terra.",
+    "biografia": "Sono Alessandro Manunta, coltelliere artigiano di origine sarda. Da oltre vent'anni creo coltelli unici, forgiando ogni lama con cura maniacale e rispetto per le tecniche tradizionali. Lavoro a Santa Maria Maggiore, in Piemonte, e ogni pezzo che esce dalla mia bottega è frutto di ore di lavoro, passione e un profondo legame con la cultura e le tradizioni della mia terra d'origine.",
     "invitoContatto": "Ogni coltello nasce da una conversazione. Raccontami cosa hai in mente e realizzeremo insieme qualcosa di unico.",
     "passaggiLavorazione": [
       {
@@ -84,7 +84,7 @@
       },
       {
         "titolo": "Forgia",
-        "testo": "La lama prende vita nella mia bottega in Sardegna. Ogni passaggio — dalla forgiatura alla rifinitura — è fatto a mano, senza fretta."
+        "testo": "La lama prende vita nella mia bottega. Ogni passaggio — dalla forgiatura alla rifinitura — è fatto a mano, senza fretta."
       },
       {
         "titolo": "Consegna",
@@ -95,7 +95,7 @@
       "whatsapp": "'+39 000 000 0000' — segnaposto, non importato",
       "email": "'info@alessandromanunta.it' — segnaposto, non importato",
       "instagram": "'@alessandromanunta' — profilo mai verificato, non importato",
-      "localita": "il vecchio sito diceva solo 'Sardegna', troppo generico per le ricerche locali"
+      "localita": "il vecchio sito diceva solo 'Sardegna'. Verificato con Alessandro il 10/09/2026: e sardo d'origine ma la bottega e a Santa Maria Maggiore (VB), in Piemonte"
     },
     "daVerificare": [
       "biografia: contiene l'affermazione 'da oltre vent'anni', da confermare con Alessandro",
