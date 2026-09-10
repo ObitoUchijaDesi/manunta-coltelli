@@ -127,12 +127,22 @@ ul { list-style: none; }
   text-transform: uppercase;
   position: relative;
   transition: color .3s;
+  /* WCAG 2.2 SC 2.5.8 chiede bersagli di almeno 24x24 px. Il testo da solo ne
+     misurava 16 di altezza: l'eccezione per i link dentro una frase non vale,
+     questi sono voci di navigazione a se' stanti. Misurato nel browser, non
+     stimato: una verifica precedente aveva controllato l'elemento della lista
+     invece del link. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
 }
 
 .nav-links a::after {
   content: '';
   position: absolute;
-  bottom: -3px; left: 0;
+  /* 1px sopra il fondo della scatola, non -3px: la scatola ora e' piu' alta
+     del testo e la riga resterebbe staccata. */
+  bottom: 1px; left: 0;
   width: 0; height: 1px;
   background: var(--gold);
   transition: width .3s ease;
@@ -223,7 +233,7 @@ ul { list-style: none; }
 
 .footer-legal {
   margin-top: .65rem;
-  font-size: .72rem;
+  font-size: .78rem;
   color: var(--muted);
 }
 
@@ -293,7 +303,9 @@ ul { list-style: none; }
   padding: .82rem 2.2rem;
   background: var(--gold);
   color: #0a0a0a;
-  font-size: .78rem;
+  /* Un pulsante e' contenuto importante, non una didascalia. A .78rem
+     misurava 12.5px in maiuscolo spaziato: leggibile ma tirato. */
+  font-size: .82rem;
   font-weight: 500;
   letter-spacing: .14em;
   text-transform: uppercase;
@@ -312,7 +324,7 @@ ul { list-style: none; }
   padding: .82rem 2.2rem;
   background: transparent;
   color: var(--text);
-  font-size: .78rem;
+  font-size: .82rem;
   font-weight: 400;
   letter-spacing: .14em;
   text-transform: uppercase;
@@ -890,7 +902,7 @@ ul { list-style: none; }
 @media (max-width: 480px) {
   .hero-h1      { font-size: clamp(2.6rem, 10vw, 3.5rem); }
   .btn-gold,
-  .btn-ghost    { padding: .75rem 1.5rem; font-size: .75rem; }
+  .btn-ghost    { padding: .75rem 1.5rem; font-size: .8rem; }
   .hero-btns    { gap: .75rem; }
 }
 
@@ -904,7 +916,11 @@ ul { list-style: none; }
   align-items: center;
   gap: .6rem;
   background: #25d366;
-  color: #fff;
+  /* Testo scuro e non bianco. Bianco su questo verde da' 1.98:1, sotto il
+     4.5:1 che WCAG chiede per il testo normale; scuro arriva intorno a 10:1.
+     Misurato sulla pagina vera, non stimato. E' anche coerente con .btn-gold,
+     che usa testo scuro su fondo chiaro. */
+  color: #07210f;
   padding: .75rem 1.25rem .75rem 1rem;
   border-radius: 50px;
   text-decoration: none;

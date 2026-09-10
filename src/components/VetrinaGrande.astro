@@ -1,0 +1,146 @@
+---
+import FotoColtello from './FotoColtello.astro'
+import {LARGHEZZE_DETTAGLIO} from '../lib/immagini'
+import type {Coltello} from '../lib/tipi'
+
+/**
+ * Un coltello grande quanto lo schermo, fra la biografia e il catalogo.
+ *
+ * Serve a due cose che la home non faceva.
+ *
+ * La prima: mostrare il lavoro. L'apertura porta il logo e una scritta, e il
+ * primo coltello arriva solo dentro una griglia di schede piccole — un sito
+ * che vende oggetti fatti a mano dovrebbe far vedere l'oggetto prima di
+ * parlarne.
+ *
+ * La seconda: il ritmo. La home era apertura grande, poi solo blocchi di
+ * testo e una griglia. Nei siti che funzionano i momenti ampi si alternano a
+ * quelli informativi: senza alternanza un sito tutto emotivo diventa vago e
+ * uno tutto informativo diventa un catalogo a stampa.
+ *
+ * Una cosa sola in tutta l'altezza dello schermo: una fotografia, il nome, una
+ * riga, un pulsante. Niente da leggere in concorrenza.
+ *
+ * Tutto quello che si legge qui viene da Sanity: il nome e la descrizione
+ * breve che Alessandro ha scritto. Non c'e' un testo di questa sezione da
+ * mantenere aggiornato, e se un giorno non ci sono coltelli la sezione non
+ * viene disegnata affatto.
+ */
+
+interface Props {
+  coltello: Coltello
+}
+
+const {coltello} = Astro.props
+---
+
+<section class="vetrina" aria-labelledby="titolo-vetrina">
+  <div class="vetrina-griglia">
+    <div class="vetrina-foto">
+      <FotoColtello
+        immagine={coltello.immaginePrincipale}
+        nomeColtello={coltello.nome}
+        larghezze={LARGHEZZE_DETTAGLIO}
+        sizes="(max-width: 900px) 92vw, 46vw"
+        class="vetrina-immagine"
+      />
+    </div>
+
+    <div class="vetrina-testo">
+      <p class="vetrina-etichetta">Dalla bottega</p>
+      <h2 class="vetrina-nome" id="titolo-vetrina">{coltello.nome}</h2>
+      {coltello.descrizioneBreve && <p class="vetrina-riga">{coltello.descrizioneBreve}</p>}
+      <a href={`/coltelli/${coltello.slug}/`} class="btn-gold vetrina-azione">
+        Guarda questo coltello
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .vetrina {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: clamp(4rem, 9vw, 7.5rem) 2rem;
+  }
+
+  .vetrina-griglia {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 5rem);
+    align-items: center;
+  }
+
+  /* La fotografia si vede INTERA, senza ritaglio.
+     Prima riempiva una fascia a tutta pagina con object-fit: cover, e su una
+     foto verticale il ritaglio centrale lasciava fuori il coltello: restava
+     il piano d'appoggio. Non si puo' sapere dove sta la lama in ogni
+     fotografia che Alessandro caricera' in futuro, quindi non si indovina:
+     si mostra tutto. */
+  /* :global perche' l'<img> lo produce FotoColtello e porta l'ambito di QUEL
+     componente, non di questo: una regola normale non lo raggiunge. Senza
+     questo, height:auto non si applicava, l'attributo height dell'immagine
+     (4284) diventava un'altezza CSS e la fotografia veniva resa alta 4284px,
+     tagliata dal contenitore. E' la trappola numero due di
+     docs/TRAPPOLE.md, ripresa in pieno. */
+  :global(.vetrina-immagine) {
+    width: 100%;
+    height: auto;
+    max-height: 72vh;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .vetrina-etichetta {
+    font-size: 0.72rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 1rem;
+  }
+
+  .vetrina-nome {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.6rem, 6vw, 4.4rem);
+    font-weight: 300;
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin: 0 0 1.2rem;
+  }
+
+  .vetrina-riga {
+    color: var(--muted);
+    font-size: 1.02rem;
+    line-height: 1.75;
+    margin: 0 0 2.2rem;
+    max-width: 34rem;
+  }
+
+  .vetrina-azione {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Due colonne solo quando c'e' spazio davvero: sotto, la fotografia sta
+     sopra e il testo sotto, che e' l'ordine in cui si guarda un oggetto. */
+  @media (min-width: 900px) {
+    .vetrina-griglia {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .vetrina {
+      padding: 4rem 1.5rem;
+    }
+
+    .vetrina-immagine {
+      max-height: 62vh;
+    }
+  }
+</style>

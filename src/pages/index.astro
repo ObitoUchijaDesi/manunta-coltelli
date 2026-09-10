@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro'
 import SchedaColtello from '../components/SchedaColtello.astro'
+import VetrinaGrande from '../components/VetrinaGrande.astro'
 import {caricaColtelli, caricaImpostazioni} from '../lib/contenuti'
 import {urlWhatsApp, messaggi} from '../lib/contatti'
 
@@ -88,6 +89,12 @@ if (impostazioni.instagram) {
         </section>
       )
     }
+
+    <!-- ── UN COLTELLO GRANDE QUANTO LO SCHERMO ── -->
+    {/* Il primo coltello dell'ordine scelto da Alessandro. Se il catalogo e'
+        vuoto la sezione non esiste: nessun riquadro grigio, nessun testo che
+        parla di qualcosa che non c'e'. */}
+    {inEvidenza.length > 0 && <VetrinaGrande coltello={inEvidenza[0]} />}
 
     <!-- ── CATALOGO IN EVIDENZA ── -->
     <section class="section" id="coltelli" aria-labelledby="titolo-coltelli">
