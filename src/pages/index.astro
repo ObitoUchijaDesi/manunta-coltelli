@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro'
 import SchedaColtello from '../components/SchedaColtello.astro'
-import VetrinaGrande from '../components/VetrinaGrande.astro'
+import PezzoInEvidenza from '../components/PezzoInEvidenza.astro'
 import {caricaColtelli, caricaImpostazioni} from '../lib/contenuti'
 import {urlWhatsApp, urlInstagram, urlFacebook, messaggi} from '../lib/contatti'
 
@@ -96,12 +96,11 @@ if (profili.length > 0) {
       )
     }
 
-    <!-- ── UN COLTELLO GRANDE QUANTO LO SCHERMO ── -->
-    {/* I primi coltelli secondo l'ordine scelto da Alessandro. Due e non tre:
-        ogni blocco occupa quasi tutto lo schermo, e con tre la home diventa
-        una salita prima di arrivare al catalogo. Per cambiarne il numero
-        basta questa riga. */}
-    {inEvidenza.length > 0 && <VetrinaGrande coltelli={inEvidenza.slice(0, 2)} />}
+    <!-- ── COM'È FATTO UN COLTELLO ── -->
+    {/* Uno solo, il primo secondo l'ordine scelto da Alessandro nel pannello.
+        Uno e non due: due blocchi uguali ripetevano il catalogo che sta poche
+        centinaia di pixel sotto. */}
+    {inEvidenza.length > 0 && <PezzoInEvidenza coltello={inEvidenza[0]} />}
 
     <!-- ── CATALOGO IN EVIDENZA ── -->
     <section class="section" id="coltelli" aria-labelledby="titolo-coltelli">
