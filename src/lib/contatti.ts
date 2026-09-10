@@ -73,6 +73,50 @@ export function urlInstagram(impostazioni: ImpostazioniSito): string | null {
 }
 
 /**
+ * Pagina Facebook, accettando entrambe le cose che una persona scrive.
+ *
+ * Chi conosce il nome della propria pagina scrive il nome; chi non lo conosce
+ * apre Facebook e copia l'indirizzo dalla barra del browser. Rifiutare la
+ * seconda forma vorrebbe dire un campo compilato e un pulsante mancante,
+ * senza che niente lo spieghi.
+ *
+ * L'indirizzo incollato si accetta solo se e' davvero di Facebook: un
+ * incollaggio sbagliato manderebbe i visitatori altrove con l'etichetta
+ * "Facebook" addosso.
+ */
+export function urlFacebook(impostazioni: ImpostazioniSito): string | null {
+  const grezzo = impostazioni.facebook?.trim()
+  if (!grezzo) return null
+
+  // I browser nascondono "https://" nella barra degli indirizzi: chi copia da
+  // li' ottiene "facebook.com/pagina". Senza questa riga quel valore veniva
+  // rifiutato e il pulsante non compariva, con il campo compilato.
+  const conProtocollo = /^(www\.|m\.)?(facebook\.com|fb\.com|fb\.me)\//i.test(grezzo)
+    ? `https://${grezzo}`
+    : grezzo
+
+  if (/^https?:\/\//i.test(conProtocollo)) {
+    try {
+      const indirizzo = new URL(conProtocollo)
+      const dominio = indirizzo.hostname.replace(/^www\./, '').replace(/^m\./, '')
+      if (dominio !== 'facebook.com' && dominio !== 'fb.com' && dominio !== 'fb.me') return null
+      if (indirizzo.pathname === '/' && !indirizzo.search) return null
+      return `https://facebook.com${indirizzo.pathname}${indirizzo.search}`
+    } catch {
+      return null
+    }
+  }
+
+  // Stesse cautele di Instagram: un campo con dentro un solo punto non e' un
+  // nome di pagina, ed e' successo davvero in questo progetto.
+  const nome = grezzo.replace(/^@/, '').replace(/^\/+|\/+$/g, '')
+  if (nome.length < 2) return null
+  if (!/^[A-Za-z0-9.\-]+$/.test(nome)) return null
+  if (!/[A-Za-z0-9]/.test(nome)) return null
+  return `https://facebook.com/${nome}`
+}
+
+/**
  * Testi precompilati.
  *
  * Descrivono il coltello e nulla di chi scrive. La distinzione conta: il

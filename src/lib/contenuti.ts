@@ -52,6 +52,7 @@ const QUERY_IMPOSTAZIONI = `*[_type == "impostazioniSito"][0] {
     whatsapp,
     email,
     instagram,
+    facebook,
     invitoContatto,
     passaggiLavorazione[] { titolo, testo }
   }`
@@ -204,6 +205,7 @@ export async function caricaImpostazioni(): Promise<ImpostazioniSito> {
     whatsapp: pulisci(dati.whatsapp) || undefined,
     email: pulisci(dati.email) || undefined,
     instagram: pulisci(dati.instagram) || undefined,
+    facebook: pulisci(dati.facebook) || undefined,
     passaggiLavorazione: (dati.passaggiLavorazione ?? []).map((p) => ({
       titolo: pulisci(p.titolo),
       testo: pulisci(p.testo),

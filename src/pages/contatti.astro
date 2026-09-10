@@ -1,7 +1,14 @@
 ---
 import Base from '../layouts/Base.astro'
 import {caricaImpostazioni} from '../lib/contenuti'
-import {urlWhatsApp, urlEmail, urlInstagram, utenteInstagram, messaggi} from '../lib/contatti'
+import {
+  urlWhatsApp,
+  urlEmail,
+  urlInstagram,
+  urlFacebook,
+  utenteInstagram,
+  messaggi,
+} from '../lib/contatti'
 
 /**
  * Nessun modulo di contatto, per scelta.
@@ -23,8 +30,9 @@ const whatsapp = urlWhatsApp(impostazioni, messaggi.generico)
 const email = urlEmail(impostazioni, messaggi.oggettoEmail(), messaggi.corpoEmail())
 const instagram = urlInstagram(impostazioni)
 const nomeInstagram = utenteInstagram(impostazioni)
+const facebook = urlFacebook(impostazioni)
 
-const nessunRecapito = !whatsapp && !email && !instagram
+const nessunRecapito = !whatsapp && !email && !instagram && !facebook
 ---
 
 <Base
@@ -70,6 +78,16 @@ const nessunRecapito = !whatsapp && !email && !instagram
                 <p class="canale-indirizzo">
                   oppure copia l’indirizzo: <span class="indirizzo">{impostazioni.email}</span>
                 </p>
+              </div>
+            )}
+
+            {facebook && (
+              <div class="canale">
+                <h2 class="canale-titolo">Facebook</h2>
+                <p class="canale-nota">La pagina della bottega.</p>
+                <a href={facebook} target="_blank" rel="noopener noreferrer" class="btn-ghost canale-azione">
+                  Apri la pagina
+                </a>
               </div>
             )}
 

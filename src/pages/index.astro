@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro'
 import SchedaColtello from '../components/SchedaColtello.astro'
 import VetrinaGrande from '../components/VetrinaGrande.astro'
 import {caricaColtelli, caricaImpostazioni} from '../lib/contenuti'
-import {urlWhatsApp, messaggi} from '../lib/contatti'
+import {urlWhatsApp, urlInstagram, urlFacebook, messaggi} from '../lib/contatti'
 
 const impostazioni = await caricaImpostazioni()
 const coltelli = await caricaColtelli()
@@ -35,8 +35,14 @@ if (impostazioni.localita) {
     addressCountry: 'IT',
   }
 }
-if (impostazioni.instagram) {
-  datiStrutturati.sameAs = [`https://instagram.com/${impostazioni.instagram.replace(/^@/, '')}`]
+// I profili dichiarati a Google. Costruiti dalle stesse funzioni che
+// disegnano i pulsanti, non a mano: un indirizzo valido nel footer e uno
+// storto nei dati strutturati e' il tipo di differenza che nessuno nota.
+const profili = [urlInstagram(impostazioni), urlFacebook(impostazioni)].filter(
+  (p): p is string => Boolean(p),
+)
+if (profili.length > 0) {
+  datiStrutturati.sameAs = profili
 }
 ---
 
@@ -183,8 +189,11 @@ if (impostazioni.instagram) {
   .hero-logo {
     display: block;
     width: auto;
-    height: clamp(90px, 16vw, 150px);
-    margin: 0 auto 2rem;
+    /* Piu' grande: il logo e' l'unica immagine dell'apertura e a 150px
+       massimi si perdeva sopra un titolo da 120. Il minimo resta alto
+       abbastanza da leggere le lame incrociate anche a 320px di schermo. */
+    height: clamp(120px, 22vw, 230px);
+    margin: 0 auto 2.25rem;
     /* Un filo smorzato: il logo apre la pagina, ma il titolo resta il
        protagonista. A piena opacità si rubano la scena a vicenda. */
     opacity: 0.9;

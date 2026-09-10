@@ -88,6 +88,14 @@ export const impostazioniSito = defineType({
       fieldset: 'contatti',
       description: 'Solo il nome utente, per esempio: alessandromanunta',
     }),
+    defineField({
+      name: 'facebook',
+      title: 'Facebook',
+      type: 'string',
+      fieldset: 'contatti',
+      description:
+        'Il nome della tua pagina, per esempio: alessandromanuntacoltelli. Se preferisci puoi incollare l’indirizzo intero copiato dal browser. Lascia vuoto se non hai una pagina Facebook: il pulsante non verrà disegnato.',
+    }),
 
     // ── Processo ───────────────────────────────────────────────
     defineField({

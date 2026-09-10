@@ -45,6 +45,7 @@ export type ImpostazioniSito = {
   whatsapp?: string
   email?: string
   instagram?: string
+  facebook?: string
   invitoContatto: string
   passaggiLavorazione: PassaggioLavorazione[]
 }

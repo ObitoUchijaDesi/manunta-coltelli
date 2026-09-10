@@ -182,4 +182,75 @@ const {coltelli} = Astro.props
       max-height: 62vh;
     }
   }
+
+  /* ── LE INFORMAZIONI ARRIVANO DOPO LA FOTOGRAFIA ─────────
+     Scorrendo, prima entra la fotografia; poi, sfalsate, l'etichetta, il
+     nome, la riga di descrizione e il pulsante. Non e' decorazione: e'
+     l'ordine in cui si guarda un oggetto fatto a mano — prima la cosa, poi
+     come si chiama, poi cosa e'.
+
+     Legato allo scorrimento e non a un timer: fermandosi a metà l'effetto sta
+     a metà, e tornando su torna indietro. Le proprietà sono scritte per
+     esteso, mai con la scorciatoia "animation": vedi docs/TRAPPOLE.md. */
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .vetrina-foto,
+      .vetrina-etichetta,
+      .vetrina-nome,
+      .vetrina-riga,
+      .vetrina-azione {
+        animation-timing-function: cubic-bezier(0.16, 0.84, 0.24, 1);
+        animation-fill-mode: both;
+        animation-timeline: view();
+      }
+
+      .vetrina-foto {
+        animation-name: vetrinaFotografia;
+        animation-range: entry 0% cover 20%;
+      }
+
+      .vetrina-etichetta {
+        animation-name: vetrinaInformazione;
+        animation-range: entry 16% cover 34%;
+      }
+
+      .vetrina-nome {
+        animation-name: vetrinaInformazione;
+        animation-range: entry 22% cover 40%;
+      }
+
+      .vetrina-riga {
+        animation-name: vetrinaInformazione;
+        animation-range: entry 28% cover 46%;
+      }
+
+      .vetrina-azione {
+        animation-name: vetrinaInformazione;
+        animation-range: entry 34% cover 52%;
+      }
+    }
+  }
+
+  @keyframes vetrinaFotografia {
+    from {
+      opacity: 0;
+      transform: translateY(46px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes vetrinaInformazione {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 </style>
