@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs'
 import {join} from 'node:path'
 import {clientSanity, sanityConfigurato} from './sanity'
-import {creaSlug, slugUnivoco} from './slug'
+import {assegnaIndirizzi, creaSlug} from './slug'
 import type {Coltello, ImpostazioniSito, Immagine} from './tipi'
 
 /**
@@ -21,8 +21,11 @@ export const ANTEPRIMA_LOCALE =
 
 // Niente "defined(slug.current)": l'indirizzo non è più obbligatorio nel
 // pannello, e un coltello senza indirizzo non deve restare invisibile.
+// "id" serve ad assegnare indirizzi stabili quando due coltelli hanno lo
+// stesso nome: l'identificativo di un documento non cambia mai, l'ordine sì.
 const QUERY_COLTELLI = `*[_type == "coltello"]
   | order(coalesce(ordine, 9999) asc, nome asc) {
+    "id": _id,
     "slug": slug.current,
     nome,
     descrizioneBreve,
@@ -116,19 +119,20 @@ export async function caricaColtelli(): Promise<Coltello[]> {
 
   const risultato = await clientSanity.fetch<any[]>(QUERY_COLTELLI)
 
-  // Gli indirizzi già assegnati, per non generarne due uguali. L'ordine
-  // arriva dalla query e non cambia da un build all'altro: a parità di dati
-  // ogni coltello ottiene sempre lo stesso indirizzo.
-  const indirizziUsati = new Set<string>()
+  // Serve l'immagine vera, non il campo immagine: un riquadro foto aggiunto
+  // e lasciato vuoto è un oggetto che esiste ma non ha dentro niente.
+  const conFoto = risultato.filter((c) => c.immaginePrincipale?.asset?._ref)
 
-  return risultato
-    // Serve l'immagine vera, non il campo immagine: un riquadro foto aggiunto
-    // e lasciato vuoto è un oggetto che esiste ma non ha dentro niente.
-    .filter((c) => c.immaginePrincipale?.asset?._ref)
+  // L'indirizzo scritto nel pannello vince; se manca si ricava dal nome. I
+  // nomi ripetuti li risolve assegnaIndirizzi, che decide in base
+  // all'identificativo del documento e non all'ordine della vetrina.
+  const indirizzi = assegnaIndirizzi(
+    conFoto.map((c) => ({id: c.id, base: pulisci(c.slug) || creaSlug(pulisci(c.nome))})),
+  )
+
+  return conFoto
     .flatMap((c): Coltello[] => {
-      // L'indirizzo scritto nel pannello vince; se manca lo ricaviamo dal nome.
-      const nome = pulisci(c.nome)
-      const slug = slugUnivoco(pulisci(c.slug) || creaSlug(nome), indirizziUsati)
+      const slug = indirizzi.get(c.id)
 
       // Senza nome non c'è indirizzo possibile. Il nome è obbligatorio per
       // pubblicare, quindi qui non ci arriva niente di normale: è la rete di
@@ -137,7 +141,7 @@ export async function caricaColtelli(): Promise<Coltello[]> {
 
       return [{
         slug,
-        nome,
+        nome: pulisci(c.nome),
         descrizioneBreve: pulisci(c.descrizioneBreve),
         descrizione: pulisci(c.descrizione),
         categoria: c.categoria,
