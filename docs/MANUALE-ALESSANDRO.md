@@ -39,7 +39,9 @@ Fatto. Il coltello è online.
 
 **Non devi compilare tutto.** Se non sai una misura, lasciala vuota. L'unica cosa che serve davvero, oltre al nome, è **almeno una fotografia**: senza, il pulsante Pubblica non funziona.
 
-**L'indirizzo della pagina** si scrive da solo partendo dal nome. Sta in fondo, nella sezione *Altre informazioni*. Non toccarlo.
+**L'indirizzo della pagina** lo calcola il sito da solo, partendo dal nome. Sta in fondo, nella sezione *Altre informazioni*: puoi lasciarlo vuoto e pubblicare, non ti chiederà niente.
+
+Una cosa sola da sapere: **se cambi il nome di un coltello che è già online, cambia anche il suo indirizzo.** I link di quel coltello mandati in giro prima smettono di funzionare. Per correggere un errore di battitura il giorno stesso non è un problema; per rinominare un coltello che gira su WhatsApp da mesi, meglio pensarci.
 
 ---
 
@@ -176,7 +178,7 @@ Nel pannello dei contenuti puoi toccare tutto: il peggio che può succedere è p
 
 Fuori dal pannello, invece, ci sono cose che è meglio lasciare stare a meno che tu non sappia cosa stai facendo:
 
-- l'**indirizzo della pagina** di un coltello già online (i link già mandati alla gente smetterebbero di funzionare);
+- il **nome** e l'**indirizzo della pagina** di un coltello già online (i link già mandati alla gente smetterebbero di funzionare);
 - le impostazioni su **GitHub**;
 - le impostazioni su **Cloudflare**;
 - i **DNS** del dominio;

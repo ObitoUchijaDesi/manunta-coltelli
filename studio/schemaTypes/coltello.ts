@@ -29,6 +29,8 @@ export const CATEGORIE = [
 ] as const
 
 /** Indirizzo leggibile: niente accenti, apostrofi o caratteri strani. */
+// Copia voluta di src/lib/slug.ts, vedi il commento in quel file: lo Studio
+// è un pacchetto separato. Se cambia una, cambiare anche l'altra.
 export function creaSlug(input: string): string {
   return input
     .toLowerCase()
@@ -205,14 +207,17 @@ export const coltello = defineType({
       type: 'slug',
       fieldset: 'altro',
       description:
-        'Si scrive da solo partendo dal nome. Se il coltello è già online, cambiarlo rompe i link già condivisi: meglio lasciarlo com’è.',
+        'Non serve toccarlo: l’indirizzo si crea da solo dal nome del coltello. Compilalo solo se vuoi deciderlo tu. Attenzione: se cambi il nome di un coltello già online, cambia anche il suo indirizzo e i link già mandati su WhatsApp non funzionano più.',
       options: {
         source: 'nome',
         maxLength: 64,
         slugify: creaSlug,
       },
-      validation: (Rule) =>
-        Rule.required().error('Premi "Genera" per creare l’indirizzo della pagina.'),
+      // Nessun Rule.required(): era un campo obbligatorio che si compilava solo
+      // premendo "Genera", dentro una sezione richiusa. Dal telefono Alessandro
+      // vedeva "Richiesto" senza avere idea di cosa fosse richiesto, e non
+      // poteva pubblicare. Se resta vuoto, l'indirizzo lo calcola il sito
+      // durante il build da src/lib/slug.ts.
     }),
   ],
 

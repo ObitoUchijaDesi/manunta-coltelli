@@ -1,6 +1,7 @@
 import {readFileSync} from 'node:fs'
 import {join} from 'node:path'
 import {clientSanity, sanityConfigurato} from './sanity'
+import {creaSlug, slugUnivoco} from './slug'
 import type {Coltello, ImpostazioniSito, Immagine} from './tipi'
 
 /**
@@ -18,7 +19,9 @@ import type {Coltello, ImpostazioniSito, Immagine} from './tipi'
 export const ANTEPRIMA_LOCALE =
   (import.meta.env.CONTENUTI_LOCALI || process.env.CONTENUTI_LOCALI) === '1'
 
-const QUERY_COLTELLI = `*[_type == "coltello" && defined(slug.current)]
+// Niente "defined(slug.current)": l'indirizzo non è più obbligatorio nel
+// pannello, e un coltello senza indirizzo non deve restare invisibile.
+const QUERY_COLTELLI = `*[_type == "coltello"]
   | order(coalesce(ordine, 9999) asc, nome asc) {
     "slug": slug.current,
     nome,
@@ -113,14 +116,28 @@ export async function caricaColtelli(): Promise<Coltello[]> {
 
   const risultato = await clientSanity.fetch<any[]>(QUERY_COLTELLI)
 
+  // Gli indirizzi già assegnati, per non generarne due uguali. L'ordine
+  // arriva dalla query e non cambia da un build all'altro: a parità di dati
+  // ogni coltello ottiene sempre lo stesso indirizzo.
+  const indirizziUsati = new Set<string>()
+
   return risultato
     // Serve l'immagine vera, non il campo immagine: un riquadro foto aggiunto
     // e lasciato vuoto è un oggetto che esiste ma non ha dentro niente.
-    .filter((c) => c.slug && c.immaginePrincipale?.asset?._ref)
-    .map(
-      (c): Coltello => ({
-        slug: c.slug,
-        nome: pulisci(c.nome),
+    .filter((c) => c.immaginePrincipale?.asset?._ref)
+    .flatMap((c): Coltello[] => {
+      // L'indirizzo scritto nel pannello vince; se manca lo ricaviamo dal nome.
+      const nome = pulisci(c.nome)
+      const slug = slugUnivoco(pulisci(c.slug) || creaSlug(nome), indirizziUsati)
+
+      // Senza nome non c'è indirizzo possibile. Il nome è obbligatorio per
+      // pubblicare, quindi qui non ci arriva niente di normale: è la rete di
+      // sicurezza perché un dato strano non faccia fallire tutto il build.
+      if (!slug) return []
+
+      return [{
+        slug,
+        nome,
         descrizioneBreve: pulisci(c.descrizioneBreve),
         descrizione: pulisci(c.descrizione),
         categoria: c.categoria,
@@ -148,8 +165,8 @@ export async function caricaColtelli(): Promise<Coltello[]> {
             riferimento: g,
             alt: g?.alt ?? '',
           })),
-      }),
-    )
+      }]
+    })
 }
 
 export async function caricaImpostazioni(): Promise<ImpostazioniSito> {
