@@ -179,14 +179,48 @@ Qualunque sia la scelta, `SITO_URL` su Cloudflare deve corrispondere esattamente
 
 ### DNS
 
-Il modo più semplice è portare il dominio sui nameserver di Cloudflare: da lì i record per Pages si configurano da soli.
+Il dominio è registrato su **Aruba**, ma le risposte DNS le dà **Cloudflare**: stando sui nameserver di Cloudflare, i record per il Worker si creano da soli e non c'è un secondo pannello da tenere allineato.
 
-1. Cloudflare → **Add a site** → inserisci il dominio.
-2. Cloudflare mostra due nameserver.
-3. Sul pannello del registrar, sostituisci i nameserver con quelli di Cloudflare.
-4. Attendi la propagazione (di solito minuti, a volte qualche ora).
-5. Cloudflare Pages → progetto → **Custom domains** → aggiungi sia il dominio nudo che `www`.
-6. Imposta il redirect permanente da `www` verso il dominio nudo (o viceversa, secondo la scelta fatta).
+1. Cloudflare → **Add a site** → il dominio, piano **Free**.
+2. Cloudflare assegna due nameserver. Per questo dominio: `ray.ns.cloudflare.com` e `wren.ns.cloudflare.com`.
+3. Aruba: `admin.aruba.it` → riquadro **Dominio** → **Gestione DNS e Name Server** → **SOSTITUISCI RECORD** → *Name Server personalizzati* → inserire i due di Cloudflare e **cancellare i quattro Aruba** (`dns.technorail.com`, `dns2.technorail.com`, `dns3.arubadns.net`, `dns4.arubadns.cz`).
+
+   Il pannello accetta fino a 6 record e non protesta se li si lascia tutti insieme, ma **nameserver misti sono peggio di nameserver sbagliati**: il dominio risponde a intermittenza a seconda di chi viene interrogato, e Cloudflare non attiva mai la zona perché continua a vedere Aruba. Devono restare solo due.
+4. Attendere che la modifica arrivi al **registro `.it`**. Aruba la registra subito nel proprio pannello ma la comunica al registro in un secondo momento: di norma qualche ora, dichiarate fino a 24. Da qui non si accelera.
+
+   Si verifica interrogando l'autorevole, senza fidarsi delle cache dei resolver pubblici:
+
+   ```bash
+   nslookup -type=ns alessandromanuntacoltelli.it a.dns.it
+   ```
+
+   Finché risponde `technorail` / `arubadns`, non è ancora passato, e il pulsante *Check nameservers now* di Cloudflare dirà *pending* qualunque cosa si faccia.
+5. Quando la zona è **Active**: il Worker `manunta-coltelli` → **Settings** → **Domains & Routes** → aggiungere il dominio nudo e `www`. I record necessari li crea Cloudflare.
+6. Redirect permanente da `www` verso il dominio nudo, secondo la scelta di host canonico fatta sopra.
+7. Aggiornare `SITO_URL` su Cloudflare e rilanciare il build: canonical, sitemap e anteprime social si ricalcolano da quella variabile.
+
+**Non attivare il DNSSEC dal pannello Aruba.** Aruba pubblicherebbe al registro l'impronta delle *proprie* chiavi, dichiarando che solo le risposte firmate da lei sono valide — ma le risposte le dà Cloudflare, con chiavi diverse. Ogni resolver che verifica le firme scarterebbe il dominio come contraffatto: non "lento", **irraggiungibile**, e per un giorno intero, perché quelle impronte restano in cache a lungo. Si può attivare, ma da Cloudflare, che gestisce chiavi e registro insieme.
+
+**Il pannello DNS di Aruba, da qui in avanti, non conta più.** I record che contiene (compreso l'`A` verso `62.149.128.40`, la pagina di parcheggio) sono inerti: modificarli o cancellarli non ha effetto sul sito. Su Aruba resta solo il rinnovo.
+
+### Posta: il dominio non manda e non riceve email
+
+Alessandro usa la sua casella personale, non un indirizzo sul dominio. Non serve quindi alcun servizio di posta — ma **un dominio senza record di posta è un dominio da cui chiunque può mandare email spacciandosi per il proprietario.** Non serve entrare in nessun account: basta un server di posta e il nome del dominio scritto nel campo mittente. Preventivi, fatture, richieste di pagamento a nome di Alessandro.
+
+Si chiude con quattro record, da scrivere una volta sola nel DNS di Cloudflare:
+
+| Type | Name | Content | Priorità |
+|---|---|---|---|
+| `MX` | `@` | `.` | `0` |
+| `TXT` | `@` | `v=spf1 -all` | — |
+| `TXT` | `_dmarc` | `v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s` | — |
+| `TXT` | `*._domainkey` | `v=DKIM1; p=` | — |
+
+In ordine: l'`MX` nullo dichiara che il dominio non riceve posta (RFC 7505); l'`SPF` con `-all` dichiara che nessun server è autorizzato a spedire per questo dominio; il `DMARC` con `p=reject` chiede ai destinatari di rifiutare — non di mettere in spam — tutto ciò che non torna, `sp=reject` estende la regola ai sottodomini; il `DKIM` con chiave vuota nega ogni firma su qualunque selettore.
+
+Manutenzione zero, nessun costo, nessuna scadenza.
+
+`ATTENZIONE`: **se un domani servisse una casella `@` sul dominio**, questi quattro record vanno cambiati *prima* di configurarla, altrimenti le email non arrivano e nulla lo spiega. Vanno sostituiti con gli `MX` del fornitore di posta, un `SPF` che lo autorizzi, e il `DMARC` va abbassato a `p=none` durante le prove. Non è un vicolo cieco: sono quattro righe. Ma è il tipo di cosa che si dimentica, e per questo sta scritta qui.
 
 ### HTTPS
 

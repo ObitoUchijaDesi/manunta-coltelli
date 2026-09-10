@@ -95,14 +95,42 @@ Il punto più importante di tutto il passaggio.
 
 | Cosa | Valore |
 |---|---|
-| Registrar | `DA COMPLETARE` |
-| Nome | `DA COMPLETARE` |
-| Scadenza | `DA COMPLETARE` |
-| Rinnovo automatico | Deve essere **attivo** |
+| Registrar | Aruba |
+| Nome | Quello configurato in `SITO_URL` (vedi `astro.config.mjs`) |
+| Registrato il | 10/09/2026 |
+| Scadenza | 10/09/2027 |
+| Rinnovo automatico | Attivo |
 | Carta | Di Alessandro |
-| Email | Di Alessandro |
-| 2FA | Attivo |
-| Nameserver | Quelli di Cloudflare |
+| Email e username | Di Alessandro — **non scritti qui**, vedi sotto |
+| 2FA | `DA ATTIVARE` — nel pannello Aruba risulta "Non attivo" |
+| Nameserver | `ray.ns.cloudflare.com` e `wren.ns.cloudflare.com` |
+
+**Perché email e username non sono in questa tabella.** Questo repository è pubblico. L'username Aruba è metà di una coppia di credenziali, e l'email è l'indirizzo a cui arrivano i recuperi password: scriverli qui vorrebbe dire pubblicarli e farli indicizzare. Si trovano nella mail di attivazione di Aruba, nella casella di Alessandro.
+
+### Nameserver: come si impostano su Aruba
+
+Servono a dire al registro dei domini `.it` che le risposte per questo indirizzo le dà Cloudflare. Senza questo passaggio il dominio esiste ma non porta da nessuna parte.
+
+Percorso documentato da Aruba:
+
+1. `admin.aruba.it` → accesso con le credenziali del dominio
+2. Riquadro **Dominio**
+3. **Gestione DNS e Name Server**
+4. Sostituire i nameserver Aruba con i due di Cloudflare
+5. Salvare, poi su Cloudflare → **Check nameservers now**
+
+La propagazione richiede da pochi minuti a qualche ora.
+
+**Se la voce non compare.** Succede: appare solo quando il tipo di servizio è "Dominio" e l'attivazione è conclusa. Non tirare a indovinare nei menù — l'assistenza Aruba è compresa nel prezzo, 24/7, e lo fa lei in pochi minuti. È la strada giusta anche in futuro, perché non dipende da nessuno sviluppatore.
+
+### Se le credenziali Aruba passano da qualcun altro
+
+Può capitare, per fare in fretta. Ma una password non è un accesso che si revoca con un clic come su GitHub o Sanity: resta nei messaggi e negli appunti. Quindi, appena il lavoro è fatto:
+
+- [ ] Alessandro cambia la password (link **Cambio Password** nel pannello)
+- [ ] Alessandro attiva la **verifica in 2 passaggi**
+
+Con il secondo punto la vecchia password non basta più per entrare, anche se resta in giro. Sono i due passaggi che si dimenticano sempre: sono qui perché non si dimentichino.
 
 **Alessandro deve poter rinnovare il dominio anche senza riuscire a contattare nessuno.** Concretamente: sa qual è il sito del registrar, sa con quale email entra, ha il 2FA sul telefono che usa tutti i giorni, e la carta salvata è la sua e non è scaduta.
 
@@ -117,6 +145,8 @@ Il passaggio è concluso quando Alessandro riesce a fare tutte queste cose **da 
 - [ ] Entrare su GitHub e trovare il repository
 - [ ] Entrare su Cloudflare e vedere l'elenco dei deploy
 - [ ] Entrare sul registrar e vedere la data di scadenza del dominio
+- [ ] Avere il 2FA attivo su Aruba, con i codici di recupero salvati
+- [ ] Aprire il sito dall'indirizzo definitivo, non da quello `.workers.dev`
 - [ ] Rimuovere lo sviluppatore da GitHub, Cloudflare e Sanity
 - [ ] Dopo averlo rimosso: pubblicare un altro coltello e vederlo online
 
