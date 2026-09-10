@@ -62,8 +62,11 @@ if (impostazioni.instagram) {
           loading="eager"
           fetchpriority="high"
         />
-        <p class="hero-eyebrow">Maestro Coltellinaio</p>
-        <h1 class="hero-h1">Lame <em>forgiate</em><br />con anima</h1>
+        {/* Una sola scritta grande, come ha chiesto Alessandro. Prima c'erano
+            due righe sovrapposte — l'occhiello "Artigianato coltelliero sardo"
+            e il titolo "Lame forgiate con anima" — che dicevano la stessa cosa
+            in due modi. */}
+        <h1 class="hero-h1">Maestro<br /><em>Coltellinaio</em></h1>
         {impostazioni.presentazioneBreve && <p class="hero-sub">{impostazioni.presentazioneBreve}</p>}
         <div class="hero-btns">
           <a href="/coltelli/" class="btn-gold">Guarda il catalogo</a>

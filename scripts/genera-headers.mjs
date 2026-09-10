@@ -154,8 +154,38 @@ console.log(`  link in uscita (solo su click):  ${[...collegamentiEsterni].join(
 
 // Rete di sicurezza: se compare un dominio esterno che la CSP non prevede,
 // meglio accorgersene al build che scoprirlo dal sito rotto in produzione.
+//
+// L'indirizzo del sito NON e' scritto qui a mano. Lo era, e il giorno in cui
+// l'indirizzo ufficiale e' passato dal www al dominio nudo il build si e'
+// fermato sostenendo che il sito stesso fosse un dominio esterno. Si ricava
+// dal canonical delle pagine appena generate: un posto in meno da ricordarsi
+// di aggiornare, e non dipende da nessuna variabile d'ambiente.
+function origineDelSito() {
+  const cerca = new RegExp('rel="canonical" href="(https?://[^"]+)"')
+  const trovato = readFileSync(join(DIST, 'index.html'), 'utf8').match(cerca)
+
+  if (!trovato) {
+    console.error(
+      `\nATTENZIONE: la home non ha un canonical, quindi non si può sapere quale\n` +
+        `sia il dominio del sito. Controllare src/layouts/Base.astro.\n`,
+    )
+    process.exit(1)
+  }
+
+  return new URL(trovato[1]).origin
+}
+
+const origineSito = origineDelSito()
+
+// Il gemello con e senza www. Esistono entrambi come dominio e uno reindirizza
+// sull'altro: una pagina che citi l'uno o l'altro non e' un errore.
+const gemelloSito = origineSito.includes('://www.')
+  ? origineSito.replace('://www.', '://')
+  : origineSito.replace('://', '://www.')
+
 const ammessi = new Set([
-  'https://www.alessandromanuntacoltelli.it',
+  origineSito,
+  gemelloSito,
   'https://cdn.sanity.io',
   'https://static.cloudflareinsights.com',
 ])

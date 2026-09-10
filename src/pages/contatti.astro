@@ -78,8 +78,15 @@ const nessunRecapito = !whatsapp && !email && !instagram
                 <h2 class="canale-titolo">Instagram</h2>
                 <p class="canale-nota">Le lavorazioni in corso, giorno per giorno.</p>
                 <a href={instagram} target="_blank" rel="noopener noreferrer" class="btn-ghost canale-azione">
-                  @{nomeInstagram}
+                  Apri il profilo
                 </a>
+                {/* Il nome utente stava dentro il pulsante, in maiuscolo e
+                    spaziato: ventisei caratteri che sfondavano il bordo della
+                    scheda. Fuori dal pulsante ci sta, si legge, e si può
+                    copiare — come l'indirizzo email qui accanto. */}
+                <p class="canale-indirizzo">
+                  oppure cercami: <span class="indirizzo">@{nomeInstagram}</span>
+                </p>
               </div>
             )}
           </div>
@@ -127,7 +134,10 @@ const nessunRecapito = !whatsapp && !email && !instagram
     padding: 1.75rem 1.5rem;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    /* stretch e non flex-start: così i tre pulsanti hanno la stessa
+       larghezza in tutte e tre le schede invece di adattarsi ognuno alla
+       propria scritta, che li faceva sembrare messi lì per caso. */
+    align-items: stretch;
     gap: 0.5rem;
   }
 
@@ -153,8 +163,19 @@ const nessunRecapito = !whatsapp && !email && !instagram
   .canale-azione {
     margin-top: 0.75rem;
     min-height: 44px;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content: center;
+    /* Su tre colonne da 240px il respiro orizzontale dei pulsanti generali
+       (2.2rem per lato) non lascia spazio a "Scrivi su WhatsApp", che
+       finiva su due righe mentre gli altri due stavano su una: tre pulsanti
+       di altezze diverse in fila. Qui il respiro è meno e la spaziatura tra
+       le lettere più stretta, e la scritta resta intera. */
+    padding-left: 1rem;
+    padding-right: 1rem;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    text-align: center;
   }
 
   .canale-indirizzo {
@@ -164,10 +185,18 @@ const nessunRecapito = !whatsapp && !email && !instagram
   }
 
   .indirizzo {
+    /* Su una riga sua: attaccato a "oppure copia l'indirizzo:" restava
+       senza spazio e si spezzava a metà parola ("a.manuntao / mg@gmail.com"),
+       che è il modo più sicuro di far sbagliare a chi lo ricopia a mano. */
+    display: block;
+    margin-top: 0.25rem;
     color: var(--text);
     /* Selezionabile con un tocco prolungato sul telefono. */
     user-select: all;
-    word-break: break-all;
+    /* anywhere e non break-all: spezza solo se davvero non ci sta, invece
+       di spezzare appena capita. */
+    word-break: normal;
+    overflow-wrap: anywhere;
   }
 
   .contatti-luogo {

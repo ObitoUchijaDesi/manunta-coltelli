@@ -81,7 +81,11 @@ Tre categorie, con regole diverse.
 |---|---|---|---|---|
 | `SANITY_PROJECT_ID` | Dice al build da quale progetto leggere | Cloudflare Pages → Environment variables | Sì | Sì |
 | `SANITY_DATASET` | Quasi sempre `production` | Cloudflare Pages → Environment variables | Sì | Sì |
-| `SITO_URL` | Indirizzo definitivo senza barra finale. Costruisce canonical, sitemap e anteprime social: se è sbagliato, i link condivisi puntano nel posto sbagliato | Cloudflare Pages → Environment variables | Sì | Sì |
+| `SITO_URL` | Indirizzo definitivo senza barra finale. Costruisce canonical, sitemap e anteprime social: se è sbagliato, i link condivisi puntano nel posto sbagliato | Cloudflare → Environment variables | **Non serve** | **Non serve** |
+
+`SITO_URL` è **facoltativa e meglio non impostarla.** Il valore giusto — `https://alessandromanuntacoltelli.it` — è già scritto in `astro.config.mjs`, dove sta accanto al codice che lo usa e cambia insieme a lui.
+
+Quando esisteva anche come variabile su Cloudflare, l'indirizzo del sito era scritto in due posti: uno è passato al dominio senza `www` e l'altro no, e per un deploy tutti i canonical e le anteprime social hanno puntato al nome sbagliato senza che niente si rompesse in modo visibile. Se la trovi impostata su Cloudflare, **cancellala**; se un giorno il dominio cambia, si cambia la riga in `astro.config.mjs`.
 
 ### BUILD ONLY — servono a costruire il sito, non compaiono nelle pagine
 

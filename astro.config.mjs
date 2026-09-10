@@ -9,7 +9,12 @@ import sitemap from '@astrojs/sitemap'
  * versione precedente: il sito non va mai giù per colpa del CMS.
  */
 
-const SITO_URL = process.env.SITO_URL ?? 'https://www.alessandromanuntacoltelli.it'
+// L'indirizzo ufficiale e' quello senza www: piu' corto da dettare e da
+// scrivere. Il www esiste e reindirizza qui. Se questo valore non combacia con
+// il dominio vero, i link condivisi su WhatsApp e le anteprime social puntano
+// nel posto sbagliato: e' scritto qui come predefinito proprio per non
+// dipendere da una variabile che qualcuno deve ricordarsi di impostare.
+const SITO_URL = process.env.SITO_URL ?? 'https://alessandromanuntacoltelli.it'
 
 export default defineConfig({
   site: SITO_URL,
