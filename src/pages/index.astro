@@ -49,6 +49,19 @@ if (impostazioni.instagram) {
     <!-- ── APERTURA ── -->
     <section class="hero" aria-label="Presentazione">
       <div class="hero-inner">
+        {/* Lo stesso logo della barra in alto, qui grande.
+            width e height espliciti più height:auto nel CSS: senza, gli
+            attributi diventano un'altezza fissa e l'immagine si stira — è il
+            difetto che avevamo già trovato sulle fotografie dei coltelli. */}
+        <img
+          src="/logo.png"
+          alt="Alessandro Manunta — Coltelli artigianali"
+          width="590"
+          height="660"
+          class="hero-logo"
+          loading="eager"
+          fetchpriority="high"
+        />
         <p class="hero-eyebrow">Artigianato coltelliero sardo</p>
         <h1 class="hero-h1">Lame <em>forgiate</em><br />con anima</h1>
         {impostazioni.presentazioneBreve && <p class="hero-sub">{impostazioni.presentazioneBreve}</p>}
@@ -156,6 +169,16 @@ if (impostazioni.instagram) {
 </Base>
 
 <style>
+  .hero-logo {
+    display: block;
+    width: auto;
+    height: clamp(90px, 16vw, 150px);
+    margin: 0 auto 2rem;
+    /* Un filo smorzato: il logo apre la pagina, ma il titolo resta il
+       protagonista. A piena opacità si rubano la scena a vicenda. */
+    opacity: 0.9;
+  }
+
   .nessun-coltello {
     color: var(--muted);
     font-size: 0.95rem;
