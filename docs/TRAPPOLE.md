@@ -31,6 +31,25 @@ Se risponde `"none"` mentre nel foglio di stile c'è un'animazione, è questo.
 
 ---
 
+## `overflow: hidden` ferma `animation-timeline: view()`
+
+**Cosa sembrava** — le animazioni legate allo scorrimento erano dichiarate, il browser le riconosceva (`animationName` giusto, `animationTimeline: view()`), e i valori restavano fermi al valore di partenza. Nessun errore.
+
+**Cosa succedeva** — `overflow: hidden` rende un elemento un **contenitore di scorrimento**. `animation-timeline: view()` di un discendente si misura sul contenitore di scorrimento più vicino, che a quel punto è quel riquadro invece della pagina. Quel riquadro non scorre mai: la timeline resta a zero e l'animazione non parte.
+
+Qui succedeva a tutto ciò che stava dentro `.hero`, `.knife-card` e la cornice della fotografia — tutti con `overflow: hidden`. Ed è per questo che la comparsa delle schede funzionava mentre la deriva della fotografia *dentro* la scheda no: la scheda sta fuori dal riquadro, la fotografia dentro.
+
+**Come accorgersene** — se l'animazione è dichiarata ma il valore non cambia scorrendo, guardare gli antenati:
+
+```js
+let e = document.querySelector('.knife-card-img')
+while (e) { const o = getComputedStyle(e).overflow; if (o !== 'visible') console.log(e.className, o); e = e.parentElement }
+```
+
+**Regola** — per ritagliare un elemento che contiene animazioni legate allo scorrimento si usa `clip-path: inset(0)`: ritaglia allo stesso modo e **non** crea un contenitore di scorrimento.
+
+---
+
 ## Gli attributi `width` e `height` battono `aspect-ratio`
 
 **Cosa sembrava** — fotografie schiacciate o stirate, ma solo alcune, e solo con le immagini vere di Sanity.

@@ -28,14 +28,21 @@ const whatsapp = urlWhatsApp(impostazioni, messaggi.perColtello(coltello, Astro.
   </span>
 
   <div class="knife-card-media" data-inclina>
-    <FotoColtello
-      immagine={coltello.immaginePrincipale}
-      nomeColtello={coltello.nome}
-      larghezze={LARGHEZZE_SCHEDA}
-      sizes="(max-width: 560px) 92vw, (max-width: 1000px) 45vw, 30vw"
-      prioritaria={prioritaria}
-      class="knife-card-img"
-    />
+    {/* La cornice ritaglia: la fotografia dentro e' ingrandita e deriva con lo
+        scorrimento, e senza ritaglio uscirebbe sopra il testo della scheda.
+        Sta dentro .knife-card-media e non al suo posto perche' il pallino
+        WhatsApp sporge sotto il bordo di proposito: se ritagliassimo il
+        contenitore esterno lo taglieremmo a meta'. */}
+    <div class="knife-card-cornice">
+      <FotoColtello
+        immagine={coltello.immaginePrincipale}
+        nomeColtello={coltello.nome}
+        larghezze={LARGHEZZE_SCHEDA}
+        sizes="(max-width: 560px) 92vw, (max-width: 1000px) 45vw, 30vw"
+        prioritaria={prioritaria}
+        class="knife-card-img"
+      />
+    </div>
 
     {
     /* Il pallino sta sopra la fotografia, fuori dal link della scheda: è un
@@ -116,6 +123,25 @@ const whatsapp = urlWhatsApp(impostazioni, messaggi.perColtello(coltello, Astro.
   /* Contenitore della fotografia: serve solo ad ancorare il pallino. */
   .knife-card-media {
     position: relative;
+  }
+
+  /* Ritaglia la deriva della fotografia. Il rapporto sta qui e non
+     sull'immagine, cosi' l'altezza della scheda non dipende da quanto
+     l'immagine viene ingrandita per derivare. */
+  .knife-card-cornice {
+    /* clip-path e non overflow:hidden: overflow renderebbe la cornice un
+       contenitore di scorrimento, e la deriva della fotografia (che usa
+       animation-timeline: view()) si misurerebbe su una cornice che non
+       scorre mai, restando ferma. */
+    clip-path: inset(0);
+    aspect-ratio: 4 / 3;
+  }
+
+  :global(.knife-card-cornice .knife-card-img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   /* Il pallino WhatsApp, appoggiato sul bordo basso della fotografia.

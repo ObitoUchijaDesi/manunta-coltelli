@@ -335,7 +335,13 @@ ul { list-style: none; }
   text-align: center;
   padding: 9rem 2rem 5rem;
   position: relative;
-  overflow: hidden;
+  /* clip-path e non overflow:hidden. Ritagliano lo stesso, ma
+     overflow:hidden rende l'elemento un contenitore di scorrimento, e
+     animation-timeline: view() di un discendente si misura su quello invece
+     che sulla pagina: quel contenitore non scorre mai, la timeline resta a
+     zero e l'animazione non parte. clip-path ritaglia senza creare uno
+     scrollport. */
+  clip-path: inset(0);
 }
 
 /* Il bagliore dell'apertura: fermo al centro finché non c'è un cursore,
@@ -477,7 +483,13 @@ ul { list-style: none; }
   border: 1px solid var(--border);
   position: relative;
   cursor: pointer;
-  overflow: hidden;
+  /* clip-path e non overflow:hidden. Ritagliano lo stesso, ma
+     overflow:hidden rende l'elemento un contenitore di scorrimento, e
+     animation-timeline: view() di un discendente si misura su quello invece
+     che sulla pagina: quel contenitore non scorre mai, la timeline resta a
+     zero e l'animazione non parte. clip-path ritaglia senza creare uno
+     scrollport. */
+  clip-path: inset(0);
   transition: border-color .35s, transform .35s, box-shadow .35s;
   display: flex;
   flex-direction: column;
@@ -1270,15 +1282,15 @@ ul { list-style: none; }
 /* ── COMPARSA ALLO SCORRIMENTO ───────────────────────────── */
 /* Il vecchio sito faceva salire le schede in dissolvenza con un
    IntersectionObserver. Qui lo stesso effetto senza una riga di JavaScript,
-   con le animazioni legate allo scorrimento.
+   con le animazioni legate allo scorrimento: se ti fermi a metà l'effetto sta
+   a metà, e tornando su torna indietro. Un timer non lo farebbe.
 
-   Tutto dentro @supports: dove il browser non le conosce (oggi Firefox) le
-   regole non si applicano affatto e il contenuto si vede normalmente. Nessun
-   elemento resta invisibile in attesa di qualcosa. */
+   Tutto dentro @supports: dove il browser non le conosce le regole non si
+   applicano affatto e il contenuto si vede normalmente. Nessun elemento resta
+   invisibile in attesa di qualcosa che non arriva. */
 
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .knife-card,
     .process-step,
     .bio-text,
     .s-title,
@@ -1294,16 +1306,41 @@ ul { list-style: none; }
       animation-timing-function: linear;
       animation-fill-mode: both;
       animation-timeline: view();
-      animation-range: entry 5% cover 28%;
+      animation-range: entry 0% cover 32%;
     }
 
-    /* Le schede del catalogo entrano leggermente sfalsate, come se le
-       stessi appoggiando sul banco una dopo l'altra. */
-    .knives-grid > *:nth-child(2n) {
-      animation-range: entry 5% cover 34%;
+    /* ── Le schede entrano dai lati, alternate ─────────────
+       Non salgono tutte allo stesso modo: la prima arriva da sinistra, la
+       seconda da destra, e via così. È l'effetto che si nota davvero
+       scorrendo il catalogo — un movimento verticale di venti pixel, quello
+       che c'era prima, non si vede nemmeno. */
+    .knives-grid > .knife-card {
+      animation-name: entraDaDestra;
+      animation-timing-function: cubic-bezier(0.16, 0.84, 0.24, 1);
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 38%;
     }
-    .knives-grid > *:nth-child(3n) {
-      animation-range: entry 5% cover 40%;
+
+    .knives-grid > .knife-card:nth-child(odd) {
+      animation-name: entraDaSinistra;
+    }
+
+    /* ── La fotografia scorre dentro la cornice ────────────
+       Mentre la pagina si muove, l'immagine deriva dentro il proprio riquadro
+       invece di stare ferma come un adesivo: è il movimento che dà profondità,
+       come guardare qualcosa attraverso una finestra mentre cammini.
+
+       Usa la proprietà "translate" e non "transform": l'inclinazione col
+       cursore di Movimento.astro scrive su "transform", e le due si
+       sommerebbero l'una sull'altra cancellandosi. Proprietà separate,
+       nessun conflitto. */
+    .knife-card-img,
+    .galleria-immagine {
+      animation-name: derivaFotografia;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
     }
   }
 }
@@ -1311,11 +1348,103 @@ ul { list-style: none; }
 @keyframes comparsa {
   from {
     opacity: 0;
-    transform: translateY(26px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes entraDaSinistra {
+  from {
+    opacity: 0;
+    transform: translate3d(-90px, 34px, 0) scale(0.93) rotate(-1.4deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes entraDaDestra {
+  from {
+    opacity: 0;
+    transform: translate3d(90px, 34px, 0) scale(0.93) rotate(1.4deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* La foto è ingrandita del 12% in partenza, altrimenti derivando mostrerebbe
+   il fondo sopra o sotto. Il 12% copre il 4% di deriva in entrambi i sensi
+   con margine. */
+@keyframes derivaFotografia {
+  from {
+    scale: 1.12;
+    translate: 0 -4%;
+  }
+  to {
+    scale: 1.12;
+    translate: 0 4%;
+  }
+}
+
+/* ── L'APERTURA SU PIÙ PIANI ─────────────────────────────── */
+/* Scorrendo, gli elementi dell'apertura salgono a velocità diverse: il logo
+   piano, il titolo di più, il testo e i pulsanti ancora di più. È il modo in
+   cui l'occhio legge la profondità — quello che sta vicino si muove tanto,
+   quello che sta lontano poco.
+
+   Prima era un unico blocco che si smorzava insieme: corretto, e invisibile. */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-logo,
+    .hero-h1,
+    .hero-sub,
+    .hero-btns {
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+
+    .hero-logo {
+      animation-name: salePiano;
+    }
+
+    .hero-h1 {
+      animation-name: saleMedio;
+    }
+
+    .hero-sub,
+    .hero-btns {
+      animation-name: saleForte;
+    }
+  }
+}
+
+@keyframes salePiano {
+  to {
+    opacity: 0;
+    translate: 0 -50px;
+  }
+}
+
+@keyframes saleMedio {
+  to {
+    opacity: 0.1;
+    translate: 0 -110px;
+  }
+}
+
+@keyframes saleForte {
+  to {
+    opacity: 0;
+    translate: 0 -170px;
   }
 }
 
@@ -1369,32 +1498,6 @@ ul { list-style: none; }
     width: 100%;
     object-fit: cover;
     animation-duration: 0.44s;
-  }
-}
-
-/* ── L'APERTURA CHE CEDE IL PASSO ────────────────────────── */
-/* Scorrendo, il titolo grande si allontana e si smorza invece di scivolare
-   via rigido: l'attenzione passa al catalogo senza uno stacco.
-
-   Legato allo scorrimento, non a un timer: se ci si ferma a metà, l'effetto si
-   ferma a metà, e tornando su torna indietro. */
-
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .hero-inner {
-      animation-name: aperturaCede;
-      animation-timing-function: linear;
-      animation-fill-mode: both;
-      animation-timeline: view();
-      animation-range: exit 15% exit 95%;
-    }
-  }
-}
-
-@keyframes aperturaCede {
-  to {
-    opacity: 0.2;
-    transform: translateY(-30px) scale(0.985);
   }
 }
 

@@ -253,6 +253,11 @@ const idDialog = `foto-${coltello.slug}`
     background: none;
     cursor: zoom-in;
     position: relative;
+    /* Ritaglia la deriva della fotografia allo scorrimento: senza, l'immagine
+       ingrandita sborderebbe sopra il titolo e sotto la scheda tecnica.
+       clip-path e non overflow:hidden, che renderebbe il bottone un
+       contenitore di scorrimento e fermerebbe la deriva sul nascere. */
+    clip-path: inset(0);
   }
 
   /* :global perché l'<img> lo produce FotoColtello, quindi porta l'ambito di
