@@ -101,7 +101,19 @@ export function urlFacebook(impostazioni: ImpostazioniSito): string | null {
       const dominio = indirizzo.hostname.replace(/^www\./, '').replace(/^m\./, '')
       if (dominio !== 'facebook.com' && dominio !== 'fb.com' && dominio !== 'fb.me') return null
       if (indirizzo.pathname === '/' && !indirizzo.search) return null
-      return `https://facebook.com${indirizzo.pathname}${indirizzo.search}`
+
+      // Via i parametri di tracciamento. Un indirizzo copiato dall'app di
+      // Facebook arriva con "mibextid", "fbclid" e simili appiccicati in coda:
+      // servono a Facebook per sapere da dove viene il clic, e pubblicarli sul
+      // sito vorrebbe dire spedire quel tracciamento a ogni visitatore che
+      // preme il pulsante. L'unico parametro che porta informazione e' "id",
+      // quello dei profili vecchio stile.
+      const parametri = new URLSearchParams()
+      const identificativo = indirizzo.searchParams.get('id')
+      if (identificativo) parametri.set('id', identificativo)
+      const coda = parametri.toString()
+
+      return `https://facebook.com${indirizzo.pathname}${coda ? `?${coda}` : ''}`
     } catch {
       return null
     }

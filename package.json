@@ -15,7 +15,8 @@
     "anteprima": "node scripts/anteprima.mjs",
     "prova-produzione": "node scripts/prova-produzione.mjs",
     "verifica-contenuti": "node scripts/verifica-contenuti.mjs",
-    "prepara-migrazione": "node scripts/prepara-migrazione.mjs"
+    "prepara-migrazione": "node scripts/prepara-migrazione.mjs",
+    "stato": "node scripts/stato-progetto.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
