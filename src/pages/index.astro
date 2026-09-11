@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro'
 import SchedaColtello from '../components/SchedaColtello.astro'
 import {caricaColtelli, caricaImpostazioni} from '../lib/contenuti'
-import {urlWhatsApp, urlInstagram, urlFacebook, messaggi} from '../lib/contatti'
+import {urlWhatsApp, urlInstagram, urlFacebook, numeroWhatsApp, messaggi} from '../lib/contatti'
 
 const impostazioni = await caricaImpostazioni()
 const coltelli = await caricaColtelli()
@@ -24,6 +24,17 @@ const datiStrutturati: Record<string, unknown> = {
   url: Astro.site?.href,
   image: new URL('/logo.png', Astro.site).href,
   knowsAbout: ['coltelli artigianali', 'coltelleria sarda', 'resolza', 'forgiatura'],
+}
+
+// Il telefono, nella forma internazionale che i motori si aspettano. E' lo
+// stesso numero gia' pubblico sul pulsante WhatsApp e sulla pagina contatti:
+// non aggiunge esposizione, aggiunge un dato che lega il sito alla persona.
+// Serve proprio a quello: quando qualcuno cerca "alessandro manunta coltelli",
+// Google deve poter riconoscere che il sito, i profili social e quel numero
+// sono la stessa attivita'.
+const telefono = numeroWhatsApp(impostazioni)
+if (telefono) {
+  datiStrutturati.telephone = `+${telefono}`
 }
 
 // Solo campi verificabili: niente prezzi inventati, niente indirizzo finto.
